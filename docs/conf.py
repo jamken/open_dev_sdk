@@ -20,6 +20,7 @@
 project = 'OpenDevSDK'
 copyright = '2019, wangjiankai'
 author = 'wangjiankai'
+master_doc = 'index'
 
 
 # -- General configuration ---------------------------------------------------
