@@ -1,15 +1,12 @@
-.. OpenDevSDK documentation master file, created by
-   sphinx-quickstart on Wed Aug  7 16:15:06 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+开放平台-设备通信协议
+========================
 
-Welcome to OpenDevSDK's documentation!
-======================================
+目录:
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
 
+   dap
 
 
 Indices and tables
