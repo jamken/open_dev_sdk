@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'OpenDevSDK'
-copyright = '2019, wangjiankai'
+copyright = '2019, jiankai'
 author = 'wangjiankai'
 master_doc = 'index'
 
