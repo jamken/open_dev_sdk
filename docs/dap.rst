@@ -588,7 +588,7 @@ OVD可通过该方法向OVC上报报警事件的开始/结束
 
   {
     "channel": <必填，整数；通道号>,
-	"datetime": <必填，字符串；格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32>
+    "datetime": <必填，字符串；格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32>
     "type": <必填，整数；报警类型：见下表>,
     "state": <必填，字符串枚举，start/end；报警状态：start，开始；end，结束>,
     "desc": <必填，字符串；描述信息>
