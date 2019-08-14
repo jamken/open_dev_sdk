@@ -52,7 +52,7 @@ OVD通过上述URL主动连接并登录OVC平台，其中“OVD设备ID”以及
 2.1 接入流程
 ++++++++++++++++
 
-
+.. image:: ovd.png
 
 1. OVD向OVC发起websocket连接，并携带上login_code，login_password等信息。
 
