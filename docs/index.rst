@@ -7,6 +7,7 @@
    :maxdepth: 2
 
    dap
+   hibernation
    OVD_OPEN_API
 
 Indices and tables
