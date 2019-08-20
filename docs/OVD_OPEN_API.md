@@ -4,20 +4,20 @@
 
    
 ## 二、接口文档概述
-## 开放SDK在系统中的位置
+## 1 开放SDK在系统中的位置
 ![SDK在系统中的位置](SDKsysarch.jpg)
 
-## 开放SDK流程简述
+## 2 开放SDK流程简述
 ![SDK流程图](SDKflowchart.jpg)
 
-## 开放SDK内容介绍
+## 3 开放SDK内容介绍
 ### 头文件
 
 ### 库文件 
 
 
 ## 三、接口详细描述
-## 1、 SDK初始化
+## 1 SDK初始化
 ### 接口定义
 **`int32_t OVDInit(OVD_DEVType type, OVDNetParam netParam, OVD_CallBackFunList callBackFunList)`**
 
@@ -32,7 +32,7 @@
     无
 
 
-## 2、开启服务（wifi连接成功后调用）
+## 2 开启服务（wifi连接成功后调用）
 ### 接口定义
 **`void OVDSerivceStart()`**
 ### 参数说明：
@@ -42,7 +42,7 @@
 ### *附加说明*
     无
 
-## 3、关闭服务（wifi断线时调用）
+## 3 关闭服务（wifi断线时调用）
 ### 接口定义
 **`void OVDSerivceStop()`**
 ### 参数说明：
@@ -52,7 +52,7 @@
 ### *附加说明*
     无
 
-## 4、告警接口
+## 4 告警接口
 ### 4.1 告警开始
 ### 接口定义
 **`int32_t OVDAlarmInfoStart(OVD_UpLoadAlarmInfo alarmInfo)`**
@@ -75,7 +75,7 @@
 ### *附加说明*
     无
 
-## 5、音视频内容接口
+## 5 音视频内容接口
 ### 5.1 音视频内容准备传送接口
 ### 接口定义
 **`int32_t OVDAudioOrVideoStart(uint8_t channel,OVD_ContentType contentType,EncodeMode eCodeMode,uint32_t SuggestBitRate,OVDVideoDataFormat* videoinfo)`**
@@ -117,7 +117,7 @@
 ### *附加说明*
     无
 
-## 6、录像回放内容推送接口
+## 6 录像回放内容推送接口
 *录像内容查询、打开录像文件、录像文件控制、录像删除等功能，由回调函数定义，详见（SDK初始化）的参数定义*
 ### 接口定义
 **`int32_t OVDSendRecordVedioOrAudioContent(uint8_t channel,uint8_t contentType,char isIFrame,char isIFrame,void* contentData,uint32_t videoDataLen,uint32_t timestamp)`**
@@ -134,7 +134,7 @@
 ### *附加说明*
     无
 
-## 7、声波配置网络接口
+## 7 声波配置网络接口
 ### 7.1 声波初始化
 ### 接口定义
 **`void* OVDSoundWaveInit(int sampleRate,int bitWidth)`**
@@ -184,7 +184,7 @@
 ### *附加说明*
     无
 
-## 8、门锁端特殊接口
+## 8 门锁端特殊接口
 ### 7.1 上报门锁操作消息(开锁/增删用户/系统锁定/系统恢复出厂设置等等)
 ### 接口定义
 **`int32_t OVDLockUploadMsgInfo(OVDLockMsgInfo lockinfo)`**
@@ -197,7 +197,7 @@
     无
 
 
-## 9、回调OVD_CallBackFunList定义及说明
+## 9 回调OVD_CallBackFunList定义及说明
 ### 9.1 回调结构体定义
     typedef struct{
         
@@ -477,7 +477,7 @@
     }OVD_CallBackFunList;
 
 
-## 10、附加定义及说明
+## 10 附加定义及说明
     typedef struct
 	{
 		char devType[48];               //设备型号
