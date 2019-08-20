@@ -1,8 +1,9 @@
-# 一、设备端开放SDK集成接口说明
+# SDK对外开放API接口说明
+## 一、设备端开放SDK集成接口说明
 **本文档描述了开放SDK与本地视音频设备之间的交互接口， 通过本说明，本地视音频设备可以通过SDK提供的统一接入能力接入到开放云平台，提供相应的服务及设置。**
 
    
-# 二、接口文档概述
+## 二、接口文档概述
 ## 开放SDK在系统中的位置
 ![SDK在系统中的位置](SDKsysarch.jpg)
 
@@ -15,15 +16,15 @@
 ### 库文件 
 
 
-# 三、接口详细描述
+## 三、接口详细描述
 ## 1、 SDK初始化
 ### 接口定义
-**`int32_t OVDInit(OVD_DEVType type, OVC_NETParm netParam, OVD_CallBackFunList *pCallBackFunList)`**
+**`int32_t OVDInit(OVD_DEVType type, OVDNetParam netParam, OVD_CallBackFunList callBackFunList)`**
 
 ### 参数说明：
-    [in]type:              设备类型，详细可见枚举类型RT_DevType
-    [in]netParam:          云服务器地址及端口号，见OVC_NETParm结构体
-    [in]pCallBackFunList:  提供给服务器端调用的回调函数，以相应服务器端的请求，见OVD_CallBackFunList。   注：若未提供相关的回调函数，则相关请求被丢弃，及设备端不提供对应的功能。
+    [in]type:              设备类型，详细可见枚举类型OVD_DevType
+    [in]netParam:          云服务器地址及端口号，见OVDNetParam结构体
+    [in]callBackFunList:   提供给服务器端调用的回调函数，以相应服务器端的请求，见OVD_CallBackFunList。   注：若未提供相关的回调函数，则相关请求被丢弃，及设备端不提供对应的功能。
 ### 返回值：
     成功：0
     失败：其他值
@@ -326,13 +327,13 @@
         //获取SD卡信息
         /*
         **参数说明:
-        **    无
+        **    [out]sdInfo:   存储卡信息,详细可见结构体描述OVDSDInfo
         **    
         **返回值：
-        **    成功：存储卡信息,详细可见结构体描述OVDSDInfo
-        **    失败：NULL
+        **    成功：0
+        **    失败：其他值
         */
-        OVDSDInfo (*OVDGetSDInfo)()
+        int32_t (*OVDGetSDInfo)(OVDSDInfo *sdInfo)
 
 
         //格式化SD卡
@@ -641,11 +642,6 @@
         DevType_PtzCamera= 15     //球机
         DevType_Other,
     }OVD_DEVType;
-
-    typedef struct _OVC_NETParm{
-        char passDomain[128];    //<云服务器域名>
-        unsigned int passPort;   //<云服务器端口>
-    }OVC_NETParm;
 
     typedef struct _OVD_UpLoadAlarmInfo
     {
