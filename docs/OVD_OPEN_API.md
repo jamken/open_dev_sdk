@@ -4,7 +4,7 @@
    
 # 二、接口文档概述
 ## 开放SDK在系统中的位置
-![SDK在系统中的位置](./SDKsysarch.jpg)
+![SDK在系统中的位置](SDKsysarch.jpg)
 
 ## 开放SDK流程简述
 ![SDK流程图](SDKflowchart.jpg)
@@ -497,14 +497,27 @@
 
     typedef struct
 	{
+        char isNetParam;                //是否配置网络信息，0：不配置，1：配置
         char isEncodeMode;              //是否配置视频清晰度，0：不配置，1：配置
         char isDateTime;                //是否配置日期时间，0：不配置，1：配置
         char isMirrorFlip;              //是否配置图像翻转，0：不配置，1：配置
 
+        OVDNetParam netParam;           //网络信息，在isNetParam为1时有效，详细见结构体OVDNetParam
         EncodeMode codeMode;            //视频清晰度，在isEncodeMode为1时有效，详细请见枚举值EncodeMode
         OVDDateTime timeInfo;           //设备时间信息，在isDateTime为1时有效，详细请见枚举值OVDDateTime
 		MirrorFlip direct;              //设备时间信息，在isMirrorFlip为1时有效，详细请见枚举值MirrorFlip
     }OVDConfigrationSetter
+
+	typedef struct
+	{
+		char passDomain[128];        //<云服务器的域名>
+		unsigned int passPort;       //<云服务器的端口>
+		char p2p_passDomain[128];    // <P2P pass 的域名>
+		unsigned int p2p_passPort;   //<杭研p2p pass的端口>
+		char turnDomain[128];        //<P2P turn的域名>
+		unsigned int turnPort;       //<p2p turn 的端口>
+	}OVDNetParam;
+
 
 	typedef enum
 	{
