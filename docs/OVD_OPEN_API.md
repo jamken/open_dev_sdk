@@ -4,10 +4,10 @@
    
 # 二、接口文档概述
 ## 开放SDK在系统中的位置
-![avatar](./SDK在系统中的位置.jpg)
+![avatar](./SDKsysarch.jpg)
 
 ## 开放SDK流程简述
-![avatar](./SDK接入流程说明.jpg)
+![avatar](SDKflowchart.jpg)
 
 ## 开放SDK内容介绍
 ### 头文件
