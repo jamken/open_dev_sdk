@@ -18,42 +18,46 @@
 
 ## 三、接口详细描述
 ## 1 SDK初始化
+### 接口描述
+设备上电后调用
 ### 接口定义
-**`int32_t OVDInit(OVD_DEVType type, OVDNetParam netParam, OVD_CallBackFunList callBackFunList)`**
+**`int32_t OVDInit(OVDClientParam clientParam, int heartBeatPeriod, LogParam logParam, OVD_CallBackFunList callBackFunList)`**
 
 ### 参数说明：
-    [in]type:              设备类型，详细可见枚举类型OVD_DevType
-    [in]netParam:          云服务器地址及端口号，见OVDNetParam结构体
+    [in]clientParam:       云服务器地址及端口号，见OVDClientParam结构体
+    [in]heartBeatPeriod:   sdk心跳的上报周期，单位为秒
+	[in]logParam:          输出日志配置信息，见LogParam结构体
     [in]callBackFunList:   提供给服务器端调用的回调函数，以相应服务器端的请求，见OVD_CallBackFunList。   注：若未提供相关的回调函数，则相关请求被丢弃，及设备端不提供对应的功能。
 ### 返回值：
     成功：0
     失败：其他值
-### *附加说明*
-    无
 
 
-## 2 开启服务（wifi连接成功后调用）
+## 2 开启服务
+### 接口描述
+wifi连接成功后调用，通知SDK网络已经准备好，可以去连接云开放平台
 ### 接口定义
 **`void OVDSerivceStart()`**
 ### 参数说明：
     无
 ### 返回值：
     无
-### *附加说明*
-    无
 
-## 3 关闭服务（wifi断线时调用）
+## 3 关闭服务
+### 接口描述
+wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口定义
 **`void OVDSerivceStop()`**
 ### 参数说明：
     无
 ### 返回值：
     无
-### *附加说明*
-    无
+
 
 ## 4 告警接口
 ### 4.1 告警开始
+### 接口描述
+设备检测到告警条件，触发告警
 ### 接口定义
 **`int32_t OVDAlarmInfoStart(OVD_UpLoadAlarmInfo alarmInfo)`**
 ### 参数说明：
@@ -65,10 +69,14 @@
     无
     
 ### 4.1 告警结束
+### 接口描述
+设备告警结束
 ### 接口定义
-**`int32_t OVDAlarmInfoEnd(OVD_IdentifyType alarmType,uint32_t endTimeStamp)`**
+**`int32_t OVDAlarmInfoEnd(uint8_t channel, OVD_AlarmType alarmType,char* endTimeStamp)`**
 ### 参数说明：
-    [in]alarmType:    告警类型，详细可见枚举OVD_IdentifyType
+    [in]channel;        通道号
+    [in]alarmType:      告警类型，详细可见枚举OVD_AlarmType
+	[in]endTimeStamp:   报警结束时间戳，格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32
 ### 返回值：
     成功：0
     失败：其他值
@@ -77,14 +85,15 @@
 
 ## 5 音视频内容接口
 ### 5.1 音视频内容准备传送接口
+### 接口描述
+设备准备好音频、视频或者音视频，开始准备发送
 ### 接口定义
-**`int32_t OVDAudioOrVideoStart(uint8_t channel,OVD_ContentType contentType,EncodeMode eCodeMode,uint32_t SuggestBitRate,OVDVideoDataFormat* videoinfo)`**
+**`int32_t OVDAVStart(uint8_t channel,OVD_ContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
 ### 参数说明：
     [in]channel:         通道号
-    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType
-    [in]eCodeMode:       视频清晰度，详细可见枚举类型EncodeMode
-    [in]SuggestBitRate:  建议码率(可忽视)
-    [in]videoinfo:       视频信息,详见结构体OVDVideoDataFormat
+    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType 音频、视频、音视频
+    [in]videoinfo:       视频信息,详见结构体OVDVideoDataFormat，OVD_ContentType为视频、音视频有效
+    [in]audeoinfo:       视频信息,详见结构体OVDAudeoDataFormat，OVD_ContentType为音频、音视频有效
 ### 返回值：
     成功：0
     失败：其他值
@@ -92,10 +101,13 @@
     无
 
 ### 5.2 音视频内容推送接口
+### 接口描述
+设备向SDK推动音视频内容
 ### 接口定义
-**`int32_t OVDAudioOrVideoPushData(uint8_t channel,char isIFrame,void* contentData, uint32_t videoDataLen,uint32_t timestamp)`**
+**`int32_t OVDAVPushData(uint8_t channel,OVD_ContentType contentType,char isIFrame,void* contentData,uint32_t dataLen,time_t timestamp)`**
 ### 参数说明：
     [in]channel:         通道号
+    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType 音频、视频、音视频
     [in]isIFrame:        是否是I帧  0：不是 1：是
     [in]contentData:     发送数据的首字节指针
     [in]videoDataLen:    本次发送数据的长度
@@ -108,22 +120,41 @@
 
 ### 5.3 音视频内容传送结束接口
 ### 接口定义
-**`int32_t OVDAudioOrVideoEnd(uint8_t channel)`**
+**`int32_t OVDAVEnd(uint8_t channel,OVD_ContentType contentType)`**
 ### 参数说明：
     [in]channel:         通道号
+    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType 音频、视频、音视频
 ### 返回值：
     成功：0
     失败：其他值
 ### *附加说明*
     无
 
-## 6 录像回放内容推送接口
-*录像内容查询、打开录像文件、录像文件控制、录像删除等功能，由回调函数定义，详见（SDK初始化）的参数定义*
+### 5.4 音视频参数修改
+### 接口描述
+已经启动音视频传送后，若设备的音视频参数修改，则调用此接口通知sdk变动的参数
 ### 接口定义
-**`int32_t OVDSendRecordVedioOrAudioContent(uint8_t channel,uint8_t contentType,char isIFrame,char isIFrame,void* contentData,uint32_t videoDataLen,uint32_t timestamp)`**
+**`int32_t OVDAVParamModify(uint8_t channel,OVD_ContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
 ### 参数说明：
     [in]channel:         通道号
-    [in]contentType:     内容类型   0：视频内容 1：音频内容
+    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType 音频、视频、音视频
+    [in]videoinfo:       视频信息,详见结构体OVDVideoDataFormat，OVD_ContentType为视频、音视频有效
+    [in]audeoinfo:       视频信息,详见结构体OVDAudeoDataFormat，OVD_ContentType为音频、音视频有效
+### 返回值：
+    成功：0
+    失败：其他值
+### *附加说明*
+    无
+
+## 6 SD卡录像内容回放推送接口
+### 接口描述
+APP打开相关录像文件后，设备推送相关内容
+*录像内容查询、打开录像文件、录像文件控制、录像删除等功能，由回调函数定义，详见（SDK初始化）的参数定义*
+### 接口定义
+**`int32_t OVDSendRecordAVContent(uint8_t channel,OVD_ContentType contentType,char isIFrame,char isIFrame,void* contentData,uint32_t videoDataLen,time_t timestamp)`**
+### 参数说明：
+    [in]channel:         通道号
+    [in]contentType:     准备传送的内容，详见枚举值OVD_ContentType 音频、视频、音视频
     [in]isIFrame:        是否是I帧  0：不是 1：是
     [in]contentData:     发送数据的首字节指针
     [in]videoDataLen:    本次发送数据的长度
@@ -136,6 +167,8 @@
 
 ## 7 声波配置网络接口
 ### 7.1 声波初始化
+### 接口描述
+设备检测到无网络配置信息，判断若使用声波配网，则调用此接口，传入声波参数
 ### 接口定义
 **`void* OVDSoundWaveInit(int sampleRate,int bitWidth)`**
 ### 参数说明：
@@ -148,12 +181,13 @@
     无
 
 ### 7.2 开始声波识别
+### 接口描述
+设备开始声波配网后，获取到音频文件，发送到SDK识别；SDK识别完后，调用回调end_cbfunc返回配网信息
 ### 接口定义
-**`int32_t OVDSoundWaveStart(void *recognizer,RecognizStart start_cbfunc,RecognizEnd end_cbfunc)`**
+**`int32_t OVDSoundWaveStart(void *recognizer,RecognizEnd end_cbfunc)`**
 ### 参数说明：
     [in]recognizer:      声波句柄
-    [in]start_cbfunc:    识别开始回调函数
-    [in]end_cbfunc:      识别结束回调函数（此函数返回wifi信息）
+    [in]end_cbfunc:      识别结束回调函数（此函数返回wifi信息）；回调函数定义为 void (*RecognizEnd)(struct WiFiInfo info);
 ### 返回值：
     成功：0
     失败：其他值
@@ -161,6 +195,8 @@
     无
 
 ### 7.3 采集到的声波数据，写入识别器
+### 接口描述
+设备开始声波配网后，把声波数据传入SDK的识别器
 ### 接口定义
 **`int32_t OVDSoundWaveWriteData(void *recognizer,const void *data,unsigned long len)`**
 ### 参数说明：
@@ -174,6 +210,8 @@
     无
 
 ### 7.4 停止声波识别
+### 接口描述
+识别完后，调用此接口
 ### 接口定义
 **`int32_t OVDSoundWaveStop(void *recognizer)`**
 ### 参数说明：
@@ -200,7 +238,18 @@
 ## 9 回调OVD_CallBackFunList定义及说明
 ### 9.1 回调结构体定义
     typedef struct{
-        
+        //获取设备信息
+		/*
+        **参数说明:
+        **    [out]deviceInfo:    需要设备返回的信息，详细见结构体OVDDeviceInfo
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVCGetOVDDeviceInfo)(OVDDeviceInfo *deviceInfo)        
+
+
         //设备端信息获取接口
 		/*
         **参数说明:
@@ -225,17 +274,40 @@
         int32_t (*OVCSetOVDConfigureInfo)(OVDConfigrationSetter configureSetter)
 
 
-        //重启
+        //设置SDK心跳周期：服务端设置SDK的心跳周期，由device记录到永久存储中，每次重启设备，在init中告知sdk这个心跳周期，单位为秒
         /*
         **参数说明:
-        **    [in]isRebootDevice:    是否重启设备 0：重启设备， 1：重启channel
+        **    [in]peroid:    心跳周期，单位为秒
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVDSDKHeartBeatPeriod)(uint32_t peroid)
+
+
+        //重启channel，通过此接口去重启特定的channel。注：如设备不支持单独重启channel，则直接重启设备。
+        /*
+        **参数说明:
         **    [in]channel:           若重启channel，则为需要重启的channel。 注：如设备不支持单独重启channel，则直接重启设备。
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDReBoot)(char isRebootDevice,uint8_t channel)
+        int32_t (*OVDReBootChannel)(uint8_t channel)
+
+
+        //重启设备，通过此接口去重启设备。
+        /*
+        **参数说明:
+        **    无
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVDReBootDevice)()
 
 
         //恢复配置到出厂状态
@@ -274,11 +346,11 @@
         //打开录像文件
         /*
         **参数说明:
-        **    [in]channel:         通道号
-        **    [in]recordname:      录像文件名称
-        **    [in]videoInfo:       视频信息,详细可见结构体描述OVDVideoDataFormat
-        **    [in]audioInfo:       音频信息,详细可见结构体描述OVDAudioDataFormat
-        **    [in]fileTotalTime:   该录像的时长(ms)
+        **    [in]channel:          通道号
+        **    [in]recordname:       录像文件名称
+        **    [out]videoInfo:       视频信息,详细可见结构体描述OVDVideoDataFormat
+        **    [out]audioInfo:       音频信息,详细可见结构体描述OVDAudioDataFormat
+        **    [out]fileTotalTime:   该录像的时长(ms)
         **    
         **返回值：
         **    成功：0
@@ -312,16 +384,56 @@
         int32_t (*OVDRecordFileDelete)(char* recordname)
 
 
-        //设备升级接口
+        //设备升级接口，开放平台上传新的升级包，制定升级策略后，调用此接口通知设备进行版本升级。由设备根据提供的URL去下载升级包升级
         /*
         **参数说明:
+        **    [in]firmware_model:  要升级的固件的版本号
         **    [in]upgradeURL:      升级固件的远程url，由设备主动去下载、升级
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDUpgradeInfo)(char upgradeURL[1024])
+        int32_t (*OVDFirmwareUpgrade)(char *firmware_model, char *upgradeURL)
+
+
+        //设备升级状态查询，开放平台上在下发固件升级后，会不定期的查询升级状态及进度。设备通过此接口返回当前的升级状态及进度
+        /*
+        **参数说明:
+        **    [in]firmware_model:    要查询的目标升级版本号
+        **    [out]upgradeStatus:    升级状态，详细见枚举值OVDUpgradeStatus
+        **    [out]upgradeProgress:  升级进度，整数值 0-100
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVDQueryFirmwareUpgradeStatus)(char *firmware_model, OVDUpgradeStatus *upgradeStatus, int *upgradeProgress)
+
+
+        //设备时间同步，由开放平台发起时间同步；由于网络延迟，若设备上的原有时间与服务器同步的时间的偏差在offset秒之内，则设备无需同步时间
+        /*
+        **参数说明:
+        **    [in]time:             要同步的时间，为字符串，格式yyyy-MM-ddTHH:mm:ss，例子：2016-12-05T02:15:32
+        **    [in]offset:           为整数，单位秒。由于网络延迟，设置此为可接受的偏差，若设备原时间与上面给定的时间的偏差在offset秒之内，则设备无需同步时间
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVCSyncTime)(char *time, int offset)        
+
+
+        //设备时间查询，查询设备上当前的时间
+        /*
+        **参数说明:
+        **    [out]time:             设备上的时间，为字符串，格式yyyy-MM-ddTHH:mm:ss，例子：2016-12-05T02:15:32
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVCQueryTime)(char *time)  
 
 
         //获取SD卡信息
@@ -348,23 +460,37 @@
         int32_t (*OVDSetSDCardFormat)()       
 
 
-        //云台控制设备
+        //云台控制设备，控制设备转动，携带转动速度。注：若设备不支持，则可忽略speed值
         /*
         **参数说明:
         **    [in]channel:         通道号
         **    [in]ptzcmd:          控制命令,详细可见枚举类型OVC_PTZControlCmd
-        **    [out]arg:            额外参数，目前未使用
+        **    [in]speed:           表示转动速度，整数，0-100，0最慢，100最快，默认100。 注：若设备不支持，则可忽略此参数值
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCPTZCmd)(uint8_t channel,OVC_PTZControlCmd ptzcmd,RT_ControlArgData* arg)
+        int32_t (*OVCPTZCmd)(uint8_t channel,OVC_PTZControlCmd ptzcmd,int speed)
 
-
-        //打开对讲接口
+        //获取设备预置点列表信息
         /*
         **参数说明:
+        **    [in]channel:         通道号
+        **    [out]presetList:     返回的预置点列表
+        **    [out]count:          预置点个数
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVCPTZCmd)(uint8_t channel,int *presetList, int *count)
+
+
+        //打开对讲接口，准备与APP对讲
+        /*
+        **参数说明:
+        **    [in]channel:         通道号
         **    [in]encordType:      编码类型,详细可见枚举类型AUDIOPLY_TYPE
         **    [in]sampleRate:      采样率
         **    [in]bitWidth:        位宽(8/16bit)
@@ -375,11 +501,12 @@
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayStart)(AUDIOPLY_TYPE encordType,int32_t sampleRate,int32_t bitWidth,uint32_t volume,int priority)
+        int32_t (*OVDAudioPlayStart)(uint8_t channel,AUDIOPLY_TYPE encordType,int32_t sampleRate,int32_t bitWidth,uint32_t volume,int priority)
 
-        //播放对讲音频
+        //播放对讲音频，SDK收到APP端的音频数据后，通知设备端播放
         /*
         **参数说明:
+        **    [in]channel:   通道号
         **    [in]buf:      音频数据指针
         **    [in]size:     音频数据大小
         **    
@@ -387,36 +514,49 @@
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayProGress)(uint8_t* buf, int32_t size)
+        int32_t (*OVDAudioPlayProGress)(uint8_t channel,uint8_t* buf, int32_t size)
 
 
-        //关闭对讲接口
+        //关闭对讲接口，APP端对讲结束，或者一段时间内SDK未收到APP端的数据，则调用此接口
         /*
         **参数说明:
-        **    无
+        **    [in]channel:         通道号
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayStop)()
+        int32_t (*OVDAudioPlayStop)(uint8_t channel)
 
 
-        //强制出I帧
+        //强制出I帧，通知视频强制出一个I帧
         /*
         **参数说明:
-        **    无
+        **    [in]channel:         通道号
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDForceIFrame)()
+        int32_t (*OVDForceIFrame)(uint8_t channel)
 
-
-        //音乐播放
+        //截图，截取当前的视频画面
         /*
         **参数说明:
+        **    [in]channel:         通道号
+        **    [out]ImageInfo;	   截取的图片信息
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVDSnapshot)(uint8_t channel,OVD_ImageInfo *imageInfo)
+
+
+        //音乐播放，服务器端给定播放的url，有设备去下载歌曲并播放
+        /*
+        **参数说明:
+        **    [in]channel:         通道号
         **    [in]url:          歌曲下载的url
         **    [in]priority:     优先级(越大越高，多个事务占用音频需要考虑此参数)
         **    
@@ -424,31 +564,45 @@
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDSetMp3Url)(char url[1024],int priority)
+        int32_t (*OVDSetMp3Url)(uint8_t channel,char url[1024],int priority)
 
 
-        //音乐播放控制
+        //音乐播放控制，服务器端控制音乐播放 停止、暂停、继续。
         /*
         **参数说明:
+        **    [in]channel:      通道号
         **    [in]ctrl:         播放控制,详细可见枚举类型OVD_Mp3PlayCtrl
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDMp3PlayCtrl)(OVD_Mp3PlayCtrl ctrl)
+        int32_t (*OVDMp3PlayCtrl)(uint8_t channel,OVD_Mp3PlayCtrl ctrl)
 
 
-        //获取音乐播放状态
+        //获取音乐播放状态，当前正在播放的音乐文件的URL，该域不存在或者空串表示当前未播放
         /*
         **参数说明:
-        **    [out]url:         正在播放的歌曲的下载url
+        **    [in]channel:         通道号
+        **    [out]url:            正在播放的歌曲的下载url，该域不存在或者空串表示当前未播放
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDGetMp3PlayStatus)(char url[1024])
+        int32_t (*OVDGetMp3PlayStatus)(uint8_t channel,char url[1024])
+
+
+        //云开放平台设置心跳上报周期时调用，目的设置SDK上报心跳的周期。由device记录，在每次上电初始化时由device告知sdk。默认是10s
+        /*
+        **参数说明:
+        **    [in]period:         心跳周期，单位为秒
+        **    
+        **返回值：
+        **    成功：0
+        **    失败：其他值
+        */
+        int32_t (*OVCSetHeartBeatPeriod)(int period)
 
 
         //设置门锁端的时间
@@ -480,6 +634,9 @@
 ## 10 附加定义及说明
     typedef struct
 	{
+        uint8_t channel;
+        
+
 		char devType[48];               //设备型号
 		char systemVersion[64];         //系统版本号
 		char wifiName[48];              //wifi名字<连接wifi的ssid>
@@ -495,6 +652,19 @@
 		OVDUpgradeStatus upgradeStatus; //升级状态，详细请见枚举值OVDUpgradeStatus
         MirrorFlip direct;              //图像翻转信息，详见枚举值MirrorFlip
 	}OVDConfigration;
+
+    typedef struct
+	{
+        char devId[32];                 //设备ID号
+		char hardwareModel[32];         //设备型号
+		char firmware_model[32];        //设备固件版本号
+		char wifi_ssid[48];             //设备当前连接的wifi的ssid, 该字段空串表示未连接wifi
+		int  wifi_signal;               //设备当前wifi的信号强度, 0-100, 当wifi_ssid不为空时有效
+		int  upBandwidth;               //设备探测到的上行最大带宽，单位bps，不存在则表示上行带宽未知
+		int  downBandwidth;             //设备探测到的下行最大带宽，单位bps，不存在则表示下行带宽未知
+		char ipAddr[128];               //IP地址    <局域网IP，支持IPV6>
+		char macAddr[24]; 	            //MAC地址
+	}OVDDeviceInfo;
 
     typedef struct
 	{
@@ -517,8 +687,44 @@
 		unsigned int p2p_passPort;   //<杭研p2p pass的端口>
 		char turnDomain[128];        //<P2P turn的域名>
 		unsigned int turnPort;       //<p2p turn 的端口>
+		char hibernationDomain[128];        //<休眠服务地址域名>
+		unsigned int hibernationPort;       //<休眠服务地址端口>
 	}OVDNetParam;
 
+	typedef struct
+	{
+        OVD_DEVType devType;               //设备类型，详细可见枚举类型OVD_DevType
+        char OVDDeviceID[32];           //OVD设备ID
+        char OVDPassword[64];           //OVD接入密码
+        char OVDDevType[64];            //OVD的硬件型号
+        char OVDSystemVersion[64];      //OVD的固件版本号
+        int  period;                    //device记录的SDK周期上报的周期，单位：秒
+		OVDNetParam netParam;           //网络信息
+	}OVDClientParam;
+
+	typedef struct
+	{
+		LogLevel logLevel;           //日志输出级别
+		LogSTD   logSTD;             //日志输出位置
+		void (*pLogOutCallBack)(char *outBuff);  //device提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中
+	}LogParam;
+
+    //日志输出基本依次增高
+    typedef enum{
+        OVD_LOGLEVEL_TRACE = 0, 
+        OVD_LOGLEVEL_DEBUG = 1,
+		OVD_LOGLEVEL_INFO  = 2,
+		OVD_LOGLEVEL_WARN  = 3,
+		OVD_LOGLEVEL_ERROR = 4,
+        OVD_LOGLEVEL_FATAL = 5,
+    }LogLevel;
+
+    //日志输出位置
+    typedef enum{
+        OVD_LOGSTD_OUT = 0,  //标准输出
+        OVD_LOGSTD_ERR = 1,  //标准异常
+		OVD_LOGSTD_NO  = 2,  //不输出
+    }LogSTD;
 
 	typedef enum
 	{
@@ -556,17 +762,6 @@
 		OVDRecordFileInfo fileinfo[100];        //文件列表
 	}OVDRecordFileListPerPage;
 
-    typedef struct
-	{
-		unsigned int samplesRate;		//每秒采样
-		unsigned int bitrate;			//比特率, bps
-		unsigned short waveFormat;		//编码格式
-		unsigned short channelNumber;	//音频通道号单通道1 双通道2
-		unsigned short blockAlign;		//块对齐, channelSize * (bitsSample/8)
-		unsigned short bitsPerSample;	//每采样比特数
-		unsigned short frameInterval;	//帧间隔, 单位ms
-		unsigned short reserve;
-	} OVDAudioDataFormat;
 
 	typedef enum
 	{
@@ -588,29 +783,20 @@
 
 	typedef enum
 	{
-		OVC_PTZ_MV_STOP      = 0,    //停止运动
-		OVC_PTZ_ZOOM_DEC     = 5,
-		OVC_PTZ_ZOOM_INC     = 6,
-		OVC_PTZ_FOCUS_INC    = 7,    //焦距
-		OVC_PTZ_FOCUS_DEC    = 8,
-		OVC_PTZ_MV_UP        = 9,    //向上
-		OVC_PTZ_MV_DOWN      = 10,   //向下
-		OVC_PTZ_MV_LEFT      = 11,   //向左
-		OVC_PTZ_MV_RIGHT     = 12,   //向右
-		OVC_PTZ_IRIS_INC     = 13,   //光圈
-		OVC_PTZ_IRIS_DEC     = 14, 
-		OVC_PTZ_AUTO_CRUISE  = 15,	 //自动巡航
-		OVC_PTZ_GOTO_PRESET  = 16,   //跳转预置位
-		OVC_PTZ_SET_PRESET   = 17,   //设置预置位点
-		OVC_PTZ_CLEAR_PRESET = 18,   //清除预置位点
-		OVC_PTZ_ACTION_RESET = 20,   //PTZ复位
-		OVC_PTZ_MV_LEFTUP    = 21,
-		OVC_PTZ_MV_LEFTDOWN  = 22,
-		OVC_PTZ_MV_RIGHTUP   = 23,
-		OVC_PTZ_MV_RIGHTDOWN = 24,
-		OVC_PTZ_CLEAR_TOUR   = 25,
-		OVC_PTZ_ADD_PRESET_TO_TOUR  = 26,
-		OVC_PTZ_DEL_PRESET_TO_TOUR  = 27
+		OVC_PTZ_MV_UP        = 0,   //向上
+		OVC_PTZ_MV_DOWN      = 1,   //向下
+		OVC_PTZ_MV_LEFT      = 2,   //向左
+		OVC_PTZ_MV_RIGHT     = 3,   //向右
+		OVC_PTZ_MV_UPLEFT    = 4,   //左上
+		OVC_PTZ_MV_UPRIGHT   = 5,   //右上
+		OVC_PTZ_MV_DOWNLEFT  = 6,   //左下
+		OVC_PTZ_MV_DOWNRIGHT = 7,   //右下
+		OVC_PTZ_ZOOM_IN      = 8,   //拉近
+		OVC_PTZ_ZOOM_OUT     = 9,   //拉远
+		OVC_PTZ_MV_STOP      = 10,    //停止运动
+		OVC_PTZ_GOTO_PRESET  = 11,   //跳转预置位
+		OVC_PTZ_SET_PRESET   = 12,   //设置预置位点
+		OVC_PTZ_CLEAR_PRESET = 13,   //清除预置位点
 	}OVC_PTZControlCmd;
 
 	typedef enum{
@@ -643,15 +829,13 @@
         DevType_Other,
     }OVD_DEVType;
 
-    typedef struct _OVD_UpLoadAlarmInfo
+    typedef struct
     {
-	    uint32_t		startTimeStamp;	   //报警开始时间戳
-	    OVD_ImageInfo	ImageInfo;	       //背景图信息
-	    OVD_IdentifyType	AlarmType;     //报警类型
-	
-        //当FaceOrCry为 RT_FACE 时,以下参数才起作用
-	    //OVD_FaceInfo 	FaceInfo;
-	    //OVD_IdentifyInfo IdentifyInfo;
+		uint8_t    channel;            //通道号
+	    char*      startTimeStamp;	   //报警开始时间戳，格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32
+	    OVD_AlarmType	AlarmType;     //报警类型
+        char*      desc;               //告警描述
+	    OVD_ImageInfo	ImageInfo;	   //背景图信息
     }OVD_UpLoadAlarmInfo;
 
     typedef struct _OVD_ImageInfo
@@ -663,39 +847,52 @@
 
     typedef enum
     {
-	    OVD_FACE	=	0x00,      //脸部识别
-	    OVD_CRY		=	0x01,      //哭声侦测
-  	    OVD_MOTIOM	= 	0X02,      //移动侦测
-    	OVD_VOICE	=	0x03,      //声音侦测	
-    	OVD_PEOPLE	=	0x04,	
+        OVD_OUTTER  =   0X02,      //外部告警
+  	    OVD_MOTIOM	= 	0X03,      //移动侦测
+  	    OVD_BANWANG	= 	0X04,      //移动侦测
+	    OVD_CRY		=	0x05,      //哭声侦测
+	    OVD_FACE	=	0x06,      //脸部识别
+    	OVD_VOICE	=	0x07,      //声音侦测		
     	OVD_OTHER,	
-    }OVD_IdentifyType;
+    }OVD_AlarmType;
 
     typedef enum
     {
-	    OVD_Audio	=	0x00,      //音频
-	    OVD_Video		=	0x01,  //视频
+	    OVD_Audio	=	0x00,          //音频
+	    OVD_Video   =	0x01,          //视频
+        OVD_Video_Audio   =	0x02,      //音视频
     }OVD_ContentType;
 
     typedef enum
     {
-	    RT_ERMODE  =   0x00, //初始化
-	    RT_HDMODE  =   0x01, //高清
-	    RT_SDMODE  =   0x02, //标清
-	    RT_LUMODE  =   0x03, //流畅
-    }EncodeMode;
+	    RT_1DMODE  =   0x00, //低清
+	    RT_SDMODE  =   0x01, //标清
+	    RT_HDMODE  =   0x03, //高清
+	    RT_FHDMODE  =  0x04, //全高清
+    }EncodeQuality;
 
-	typedef struct _OVD_VideoDataFormat
+	typedef struct
 	{
-		unsigned int codec;				//编码方式
-		unsigned int bitrate;        	//比特率, bps
+		char*          codec;			//编码方式，目前仅支持H264，其他不支持
+		EncodeQuality  quality;         //图像质量
+		unsigned char framerate;		//帧率, fps
 		unsigned short width;			//图像宽度
 		unsigned short height;			//图像高度
-		unsigned char framerate;		//帧率, fps
-		unsigned char colorDepth;		//should be 24 bits
-		unsigned char frameInterval;    //I帧间隔
-		unsigned char reserve;
+
+		unsigned char gop;		        //每秒多少帧
+		unsigned char frameInterval;    //I帧间隔          
 	}OVDVideoDataFormat;
+
+    typedef struct
+	{
+		char*          codec;			//编码方式，目前仅支持acc，其他不支持
+		unsigned int samplesRate;		//采样率
+		unsigned short bitsPerSample;	//每采样比特数
+		unsigned short channelNumber;	//音频声道数
+		unsigned short samplePerFrame;	//每帧的采样数
+		unsigned short frameInterval;	//帧间隔, 单位ms
+	} OVDAudioDataFormat;
+
 
     typedef struct{
 	    OVDLockMsgType	msgType;			//消息类型
@@ -745,3 +942,11 @@
 		uint32_t		m_minute;		    //0-59
 		uint32_t		m_second;		    //0-59
 	}OVDDateTime;
+
+	typedef struct
+	{
+		char ssid[33];   //wifi的ssid
+		int ssidLen;     
+		char pwd[80];    //wifi密码
+		int pwdLen;
+	}WiFiInfo;
