@@ -234,7 +234,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCGetOVDDeviceInfo)(OVDDeviceInfo *deviceInfo)        
+        int32_t (*OVCGetOVDDeviceInfo)(OVDDeviceInfo *deviceInfo);        
 
 
         //设备端信息获取接口，开放平台获取设备的配置信息
@@ -246,7 +246,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCGetOVDConfigureInfo)(OVDConfigrationInfo *configureInfo)
+        int32_t (*OVCGetOVDConfigureInfo)(OVDConfigrationInfo *configureInfo);
 
 
         //配置设备端信息接口，开放平台设置设备的配置信息
@@ -258,7 +258,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCSetOVDConfigureInfo)(OVDConfigrationInfo configureSetter)
+        int32_t (*OVCSetOVDConfigureInfo)(OVDConfigrationInfo configureSetter);
 
 
         //重启channel，通过此接口去重启特定的channel。注：如设备不支持单独重启channel，则直接重启设备。
@@ -270,7 +270,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDReBootChannel)(uint8_t channel)
+        int32_t (*OVDReBootChannel)(uint8_t channel);
 
 
         //重启设备，通过此接口去重启设备。
@@ -282,7 +282,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDReBootDevice)()
+        int32_t (*OVDReBootDevice)();
 
 
         //恢复配置到出厂状态
@@ -294,7 +294,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDResetConfiguration)(char iskeepNetConfigre)
+        int32_t (*OVDResetConfiguration)(char iskeepNetConfigre);
 
 
         //按页查询录像文件
@@ -315,7 +315,7 @@ APP打开相关录像文件后，设备推送相关内容
         **其他说明:
         **    假设查询的录像文件数有200个，numInPage=10，则最大页码Page为20。若传进的参数numInPage=10，page=2，则fileInPage应该返回第10个到第20个录像的信息;若传进的参数numInPage=10，page=21，则fileInPage返回空录像信息(录像个数为0)                     
         */
-        int32_t (*OVDQueryRecordPage)(uint8_t channel,uint8_t recordType,uint32_t StartStamp,uint32_t EndStamp,uint32_t Page,uint32_t PageNum,RTFileListPerPage_3 *FilePage)
+        int32_t (*OVDQueryRecordPage)(uint8_t channel,uint8_t recordType,uint32_t StartStamp,uint32_t EndStamp,uint32_t Page,uint32_t PageNum,RTFileListPerPage_3 *FilePage);
 
 
         //打开录像文件
@@ -331,7 +331,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDOpenRecordFile)(uint8_t channel,char* recordname,OVDVideoDataFormat* videoInfo,OVDAudioDataFormat* audioInfo,uint32_t* fileTotalTime)
+        int32_t (*OVDOpenRecordFile)(uint8_t channel,char* recordname,OVDVideoDataFormat* videoInfo,OVDAudioDataFormat* audioInfo,uint32_t* fileTotalTime);
 
 
         //录像文件控制
@@ -345,7 +345,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDRecordCotrol)(uint8_t channel,CONTROLTYPE controlType,uint32_t value)
+        int32_t (*OVDRecordCotrol)(uint8_t channel,CONTROLTYPE controlType,uint32_t value);
 
         //录像文件删除
         /*
@@ -356,7 +356,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDRecordFileDelete)(char* recordname)
+        int32_t (*OVDRecordFileDelete)(char* recordname);
 
 
         //设备升级接口，开放平台上传新的升级包，制定升级策略后，调用此接口通知设备进行版本升级。由设备根据提供的URL去下载升级包升级
@@ -369,7 +369,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDFirmwareUpgrade)(char *firmware_model, char *upgradeURL)
+        int32_t (*OVDFirmwareUpgrade)(char *firmware_model, char *upgradeURL);
 
 
         //设备升级状态查询，开放平台上在下发固件升级后，会不定期的查询升级状态及进度。设备通过此接口返回当前的升级状态及进度
@@ -383,7 +383,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDQueryFirmwareUpgradeStatus)(char *firmware_model, OVDUpgradeStatus *upgradeStatus, int *upgradeProgress)
+        int32_t (*OVDQueryFirmwareUpgradeStatus)(char *firmware_model, OVDUpgradeStatus *upgradeStatus, int *upgradeProgress);
 
 
         //设备时间同步，由开放平台发起时间同步；由于网络延迟，若设备上的原有时间与服务器同步的时间的偏差在offset秒之内，则设备无需同步时间
@@ -396,7 +396,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCSyncTime)(char *time, int offset)        
+        int32_t (*OVCSyncTime)(char *time, int offset);      
 
 
         //设备时间查询，查询设备上当前的时间
@@ -420,7 +420,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDGetSDInfo)(OVDSDInfo *sdInfo)
+        int32_t (*OVDGetSDInfo)(OVDSDInfo *sdInfo);
 
 
         //格式化SD卡
@@ -432,7 +432,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDSetSDCardFormat)()       
+        int32_t (*OVDSetSDCardFormat)();       
 
 
         //云台控制设备，控制设备转动，携带转动速度。注：若设备不支持，则可忽略speed值
@@ -446,7 +446,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCPTZCmd)(uint8_t channel,OVC_PTZControlCmd ptzcmd,int speed)
+        int32_t (*OVCPTZCmd)(uint8_t channel,OVC_PTZControlCmd ptzcmd,int speed);
 
         //获取设备预置点列表信息
         /*
@@ -459,7 +459,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCPTZCmd)(uint8_t channel,int *presetList, int *count)
+        int32_t (*OVCPTZCmd)(uint8_t channel,int *presetList, int *count);
 
 
         //打开对讲接口，准备与APP对讲
@@ -476,7 +476,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayStart)(uint8_t channel,AUDIOPLY_TYPE encordType,int32_t sampleRate,int32_t bitWidth,uint32_t volume,int priority)
+        int32_t (*OVDAudioPlayStart)(uint8_t channel,AUDIOPLY_TYPE encordType,int32_t sampleRate,int32_t bitWidth,uint32_t volume,int priority);
 
         //播放对讲音频，SDK收到APP端的音频数据后，通知设备端播放
         /*
@@ -489,7 +489,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayProGress)(uint8_t channel,uint8_t* buf, int32_t size)
+        int32_t (*OVDAudioPlayProGress)(uint8_t channel,uint8_t* buf, int32_t size);
 
 
         //关闭对讲接口，APP端对讲结束，或者一段时间内SDK未收到APP端的数据，则调用此接口
@@ -501,7 +501,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDAudioPlayStop)(uint8_t channel)
+        int32_t (*OVDAudioPlayStop)(uint8_t channel);
 
 
         //强制出I帧，通知视频强制出一个I帧
@@ -513,7 +513,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDForceIFrame)(uint8_t channel)
+        int32_t (*OVDForceIFrame)(uint8_t channel);
 
         //截图，截取当前的视频画面
         /*
@@ -525,7 +525,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDSnapshot)(uint8_t channel,OVD_ImageInfo *imageInfo)
+        int32_t (*OVDSnapshot)(uint8_t channel,OVD_ImageInfo *imageInfo);
 
 
         //音乐播放，服务器端给定播放的url，有设备去下载歌曲并播放
@@ -539,7 +539,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDSetMp3Url)(uint8_t channel,char url[1024],int priority)
+        int32_t (*OVDSetMp3Url)(uint8_t channel,char url[1024],int priority);
 
 
         //音乐播放控制，服务器端控制音乐播放 停止、暂停、继续。
@@ -552,7 +552,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDMp3PlayCtrl)(uint8_t channel,OVD_Mp3PlayCtrl ctrl)
+        int32_t (*OVDMp3PlayCtrl)(uint8_t channel,OVD_Mp3PlayCtrl ctrl);
 
 
         //获取音乐播放状态，当前正在播放的音乐文件的URL，该域不存在或者空串表示当前未播放
@@ -565,7 +565,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDGetMp3PlayStatus)(uint8_t channel,char url[1024])
+        int32_t (*OVDGetMp3PlayStatus)(uint8_t channel,char url[1024]);
 
 
         //设置门锁端的时间
@@ -577,7 +577,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDSetLockTime)(OVDDateTime timeInfo)
+        int32_t (*OVDSetLockTime)(OVDDateTime timeInfo);
 
 
         //获取门锁端的时间
@@ -589,7 +589,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVDGetLockTime)(OVDDateTime *timeInfo)
+        int32_t (*OVDGetLockTime)(OVDDateTime *timeInfo);
 
     }OVD_CallBackFunList;
 
@@ -686,14 +686,14 @@ ionSette
 
 	typedef enum
 	{
-		OVD_STATUS_IDLE	          =	  0x00,  //空闲胎
-		OVD_STATUS_DOWNLOADING	  =	  0x01,  //安装包下载中
-		OVD_STATUS_DOWNLOADED     =   0x02,  //安装包下载完成
-		OVD_STATUS_WAIT_INSTALL   =   0x03,  //等待安装
-		OVD_STATUS_INSTALLING     =   0x04,  //安装中
-		OVD_STATUS_INSTALLED      =   0x05,  //已安装完毕
-		OVD_STATUS_FAILED         =   0x06,  //安装失败
-		OVD_STATUS_BUSY           =   0x07,  //系统忙
+		OVD_STATUS_IDLE	          =	  0,  //空闲胎
+		OVD_STATUS_DOWNLOADING	  =	  1,  //安装包下载中
+		OVD_STATUS_DOWNLOADED     =   2,  //安装包下载完成
+		OVD_STATUS_WAIT_INSTALL   =   3,  //等待安装
+		OVD_STATUS_INSTALLING     =   4,  //安装中
+		OVD_STATUS_INSTALLED      =   5,  //已安装完毕
+		OVD_STATUS_FAILED         =   6,  //安装失败
+		OVD_STATUS_BUSY           =   7,  //系统忙
 	}OVDUpgradeStatus;
 
 	typedef struct
@@ -721,12 +721,12 @@ ionSette
 
 	typedef enum
 	{
-		OVD_CONTINUE	=	0x00,  //继续播放
-		OVD_PAUSE	    =	0x01,  //暂停
-		OVD_STOP        =   0x02,  //停止
-		OVD_FAST        =   0x03,  //快进
-		OVD_SLOW        =   0x04,  //慢放
-		OVD_JUMP        =   0x05,  //拖动  ms
+		OVD_CONTINUE	=	0,  //继续播放
+		OVD_PAUSE	    =	1,  //暂停
+		OVD_STOP        =   2,  //停止
+		OVD_FAST        =   3,  //快进
+		OVD_SLOW        =   4,  //慢放
+		OVD_JUMP        =   5,  //拖动  ms
 	}CONTROLTYPE;
 
 	typedef struct
@@ -761,9 +761,9 @@ ionSette
 
 	typedef enum
 	{
-		MP3_CLOSE	=	0x00,  	 //停止播放
-		MP3_PAUSE	=	0x01,  	 //暂停播放
-		MP3_RESUME	= 	0X02,    //恢复播放
+		MP3_CLOSE	=	0,  	 //停止播放
+		MP3_PAUSE	=	1,  	 //暂停播放
+		MP3_RESUME	= 	2,    //恢复播放
 		MP3_OTHER,
 	}OVD_Mp3PlayCtrl;
 
@@ -803,28 +803,28 @@ ionSette
 
     typedef enum
     {
-        OVD_OUTTER  =   0X02,      //外部告警
-  	    OVD_MOTIOM	= 	0X03,      //移动侦测
-  	    OVD_CROSS	= 	0X04,      //拌网侦测
-	    OVD_CRY		=	0x05,      //哭声侦测
-	    OVD_FACE	=	0x06,      //脸部识别
-    	OVD_VOICE	=	0x07,      //声音侦测		
+        OVD_OUTTER  =   1,      //外部告警
+  	    OVD_MOTIOM	= 	2,      //移动侦测
+  	    OVD_CROSS	= 	3,      //拌网侦测
+	    OVD_CRY		=	4,      //哭声侦测
+	    OVD_FACE	=	5,      //脸部识别
+    	OVD_VOICE	=	6,      //声音侦测		
     	OVD_OTHER,	
     }OVD_AlarmType;
 
     typedef enum
     {
-	    OVD_Audio	=	0x00,          //音频
-	    OVD_Video   =	0x01,          //视频
-        OVD_Video_Audio   =	0x02,      //音视频
+	    OVD_Audio	=	0,          //音频
+	    OVD_Video   =	1,          //视频
+        OVD_Video_Audio   =	2,      //音视频
     }OVD_ContentType;
 
     typedef enum
     {
-	    RT_1DMODE  =   0x00, //低清
-	    RT_SDMODE  =   0x01, //标清
-	    RT_HDMODE  =   0x03, //高清
-	    RT_FHDMODE  =  0x04, //全高清
+	    RT_1DMODE  =   0, //低清
+	    RT_SDMODE  =   1, //标清
+	    RT_HDMODE  =   3, //高清
+	    RT_FHDMODE  =  4, //全高清
     }EncodeQuality;
 
 	typedef struct
@@ -863,14 +863,14 @@ ionSette
     }OVDLockMsgInfo;
 
     typedef enum {
-	    OVD_LOCK_OPEN		=	0x00,	   //开锁事件
-	    OVD_LOCK_PICKALARM	=	0x01,	   //撬锁事件
-	    OVD_LOCK_ADDUSER	=	0x02,	   //添加用户事件
-	    OVD_LOCK_DELUSER	=	0x03,  //删除用户事件
-	    OVD_LOCK_DOORBELL	= 	0x04,	   //门铃事件
-	    OVD_LOCK_SYSTEMLOCK	=	0x05,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
-	    OVD_LOCK_LOWBAT		=	0x06,	   //低电报警
-	    OVD_LOCK_RESET		=	0x07,	   //恢复出厂设置报警
+	    OVD_LOCK_OPEN		=	0,	   //开锁事件
+	    OVD_LOCK_PICKALARM	=	1,	   //撬锁事件
+	    OVD_LOCK_ADDUSER	=	2,	   //添加用户事件
+	    OVD_LOCK_DELUSER	=	3,  //删除用户事件
+	    OVD_LOCK_DOORBELL	= 	4,	   //门铃事件
+	    OVD_LOCK_SYSTEMLOCK	=	5,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
+	    OVD_LOCK_LOWBAT		=	6,	   //低电报警
+	    OVD_LOCK_RESET		=	7,	   //恢复出厂设置报警
     }OVDLockMsgType;
 
     typedef struct 
@@ -900,7 +900,7 @@ ionSette
 
 	typedef struct
 	{
-		char ssid[33];   //wifi的ssid
+		char ssid[64];   //wifi的ssid
 		int  ssidLen;     
 		char pwd[80];    //wifi密码
 		int  pwdLen;
