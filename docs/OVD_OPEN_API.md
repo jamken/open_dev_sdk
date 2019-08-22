@@ -21,11 +21,10 @@
 ### 接口描述
 设备上电后调用
 ### 接口定义
-**`int32_t OVDInit(OVDClientParam clientParam, int heartBeatPeriod, LogParam logParam, OVD_CallBackFunList callBackFunList)`**
+**`int32_t OVDInit(OVDClientParam clientParam, LogParam logParam, OVD_CallBackFunList callBackFunList)`**
 
 ### 参数说明：
     [in]clientParam:       云服务器地址及端口号，见OVDClientParam结构体
-    [in]heartBeatPeriod:   sdk心跳的上报周期，单位为秒
 	[in]logParam:          输出日志配置信息，见LogParam结构体
     [in]callBackFunList:   提供给服务器端调用的回调函数，以相应服务器端的请求，见OVD_CallBackFunList。   注：若未提供相关的回调函数，则相关请求被丢弃，及设备端不提供对应的功能。
 ### 返回值：
@@ -238,7 +237,7 @@ APP打开相关录像文件后，设备推送相关内容
 ## 9 回调OVD_CallBackFunList定义及说明
 ### 9.1 回调结构体定义
     typedef struct{
-        //获取设备信息
+        //获取设备信息，开放平台获取设备的固有信息
 		/*
         **参数说明:
         **    [out]deviceInfo:    需要设备返回的信息，详细见结构体OVDDeviceInfo
@@ -250,40 +249,28 @@ APP打开相关录像文件后，设备推送相关内容
         int32_t (*OVCGetOVDDeviceInfo)(OVDDeviceInfo *deviceInfo)        
 
 
-        //设备端信息获取接口
+        //设备端信息获取接口，开放平台获取设备的配置信息
 		/*
         **参数说明:
-        **    [out]configureInfo:    需要返回的信息，其中没有的项置为NULL，详细可见结构体描述OVDConfigration
+        **    [out]configureInfo:    需要返回的信息，其中没有的项置为NULL，详细可见结构体描述OVDConfigrationInfo
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCGetOVDConfigureInfo)(OVDConfigration *configureInfo)
+        int32_t (*OVCGetOVDConfigureInfo)(OVDConfigrationInfo *configureInfo)
 
 
-        //配置设备端信息接口
+        //配置设备端信息接口，开放平台设置设备的配置信息
 		/*
         **参数说明:
-        **    [in]configureSetter:    需要设置的信息，其中没有的项置为NULL，详细可见结构体描述OVDConfigrationSetter
+        **    [in]configureSetter:    需要设置的信息，详细可见结构体描述OVDConfigrationInfo
         **    
         **返回值：
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVCSetOVDConfigureInfo)(OVDConfigrationSetter configureSetter)
-
-
-        //设置SDK心跳周期：服务端设置SDK的心跳周期，由device记录到永久存储中，每次重启设备，在init中告知sdk这个心跳周期，单位为秒
-        /*
-        **参数说明:
-        **    [in]peroid:    心跳周期，单位为秒
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：其他值
-        */
-        int32_t (*OVDSDKHeartBeatPeriod)(uint32_t peroid)
+        int32_t (*OVCSetOVDConfigureInfo)(OVDConfigrationInfo configureSetter)
 
 
         //重启channel，通过此接口去重启特定的channel。注：如设备不支持单独重启channel，则直接重启设备。
@@ -593,18 +580,6 @@ APP打开相关录像文件后，设备推送相关内容
         int32_t (*OVDGetMp3PlayStatus)(uint8_t channel,char url[1024])
 
 
-        //云开放平台设置心跳上报周期时调用，目的设置SDK上报心跳的周期。由device记录，在每次上电初始化时由device告知sdk。默认是10s
-        /*
-        **参数说明:
-        **    [in]period:         心跳周期，单位为秒
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：其他值
-        */
-        int32_t (*OVCSetHeartBeatPeriod)(int period)
-
-
         //设置门锁端的时间
         /*
         **参数说明:
@@ -630,83 +605,78 @@ APP打开相关录像文件后，设备推送相关内容
 
     }OVD_CallBackFunList;
 
-
+ionSette
 ## 10 附加定义及说明
     typedef struct
 	{
-        uint8_t channel;
-        
+        uint8_t channel;                //通道号， 必填
+        OVDVideoDataFormat videoinfo; 	//视频信息,必填,详细可见结构体OVDVideoDataFormat
+        OVDAudioDataFormat audioinfo; 	//视频信息,必填,详细可见结构体OVDAudioDataFormat
+		MirrorFlip         flipInfo;    //图像翻转信息，必填,详见结构体MirrorFlip
+        AlarmsSet          alarms;      //各种告警设置信息，必填,详见结构体AlarmsSet
+        int                audioOutValume;  //扬声器输出音量，可选，0-100为正常值。小于0为不支持
+        bool               traceAbility;    //移动跟踪，可选，true支持跟踪，false不支持跟踪
+        int                tz;              //时区信息，必填，例如东八区为8
+	}OVDConfigrationInfo;
 
-		char devType[48];               //设备型号
-		char systemVersion[64];         //系统版本号
-		char wifiName[48];              //wifi名字<连接wifi的ssid>
-		int  wifiValue;                 //wifi强度<wifi的强弱 dBm值取反>
-		int  upBandwidth;               //上行带宽<可忽视>
-		int  downBandwidth;             //下行带宽<可忽视>
-		char deviceNum[32];             //设备号   <设备的UUID，跟杭研平台申请，每台设备一个>
-		char ipAddr[128];               //IP地址    <局域网IP，支持IPV6>
-		char macAddr[24]; 	            //MAC地址  
-        OVDDateTime timeInfo;           //设备时间信息
-	    EncodeMode codeMode;            //视频清晰度，详细请见枚举值EncodeMode
-	    OVDVideoDataFormat videoinfo; 	//视频信息,详细可见枚举值OVDVideoDataFormat
-		OVDUpgradeStatus upgradeStatus; //升级状态，详细请见枚举值OVDUpgradeStatus
-        MirrorFlip direct;              //图像翻转信息，详见枚举值MirrorFlip
-	}OVDConfigration;
+    typedef struct{
+        AlarmInfo   ioAlarm;              //外部报警配置，必填
+        AlarmInfo   faceAlarm;            //人脸识别配置，必填
+        AlarmInfo   cryAlarm;             //哭声侦测配置，必填
+        AlarmInfo   voiceAlarm;           //声音侦测配置，必填
+        AlarmInfo   motionAlarm;          //移动侦测配置，必填
+        AlarmInfo   crossAlarm;           //拌网配置，必填
+    }AlarmsSet;
 
+    typedef struct{
+        bool isEffect;                  //是否具备此能力，若设备无此能力，置为false
+        bool on;                        //是否打开此功能，在isEffect为true时有效
+        int  sensitivity;               //探测灵敏度，范围为0-100，在isEffect为true时有效
+    }AlarmInfo;
+
+ 
     typedef struct
 	{
-        char devId[32];                 //设备ID号
-		char hardwareModel[32];         //设备型号
-		char firmware_model[32];        //设备固件版本号
-		char wifi_ssid[48];             //设备当前连接的wifi的ssid, 该字段空串表示未连接wifi
-		int  wifi_signal;               //设备当前wifi的信号强度, 0-100, 当wifi_ssid不为空时有效
-		int  upBandwidth;               //设备探测到的上行最大带宽，单位bps，不存在则表示上行带宽未知
-		int  downBandwidth;             //设备探测到的下行最大带宽，单位bps，不存在则表示下行带宽未知
-		char ipAddr[128];               //IP地址    <局域网IP，支持IPV6>
-		char macAddr[24]; 	            //MAC地址
+        char devId[32];                 //设备ID号，必填
+		char hardwareModel[32];         //设备型号，必填
+		char firmware_model[32];        //设备固件版本号，必填
+		char wifi_ssid[48];             //设备当前连接的wifi的ssid, 该字段空串表示未连接wifi，可选
+		int  wifi_signal;               //设备当前wifi的信号强度, 0-100, 当wifi_ssid不为空时有效，可选
+		int  upBandwidth;               //设备探测到的上行最大带宽，单位bps，不存在则表示上行带宽未知，负值表示未知，可选
+		int  downBandwidth;             //设备探测到的下行最大带宽，单位bps，不存在则表示下行带宽未知，负值表示未知，可选
+		char ipAddr[128];               //IP地址    <局域网IP，支持IPV6>，空值表示未知，可选
+		char macAddr[24]; 	            //MAC地址，空值表示未知，可选
 	}OVDDeviceInfo;
 
-    typedef struct
-	{
-        char isNetParam;                //是否配置网络信息，0：不配置，1：配置
-        char isEncodeMode;              //是否配置视频清晰度，0：不配置，1：配置
-        char isDateTime;                //是否配置日期时间，0：不配置，1：配置
-        char isMirrorFlip;              //是否配置图像翻转，0：不配置，1：配置
-
-        OVDNetParam netParam;           //网络信息，在isNetParam为1时有效，详细见结构体OVDNetParam
-        EncodeMode codeMode;            //视频清晰度，在isEncodeMode为1时有效，详细请见枚举值EncodeMode
-        OVDDateTime timeInfo;           //设备时间信息，在isDateTime为1时有效，详细请见枚举值OVDDateTime
-		MirrorFlip direct;              //设备时间信息，在isMirrorFlip为1时有效，详细请见枚举值MirrorFlip
-    }OVDConfigrationSetter
 
 	typedef struct
 	{
-		char passDomain[128];        //<云服务器的域名>
-		unsigned int passPort;       //<云服务器的端口>
-		char p2p_passDomain[128];    // <P2P pass 的域名>
-		unsigned int p2p_passPort;   //<杭研p2p pass的端口>
-		char turnDomain[128];        //<P2P turn的域名>
-		unsigned int turnPort;       //<p2p turn 的端口>
-		char hibernationDomain[128];        //<休眠服务地址域名>
-		unsigned int hibernationPort;       //<休眠服务地址端口>
+		char passDomain[128];        //<云服务器的域名>，必填
+		unsigned int passPort;       //<云服务器的端口>，必填
+		char p2p_passDomain[128];    // <P2P pass 的域名>，必填
+		unsigned int p2p_passPort;   //<杭研p2p pass的端口>，必填
+		char turnDomain[128];        //<P2P turn的域名>，没有置为空
+		unsigned int turnPort;       //<p2p turn 的端口>，没有置为-1
+		char hibernationDomain[128];        //<休眠服务地址域名>，没有置为空
+		unsigned int hibernationPort;       //<休眠服务地址端口>，没有置为-1
 	}OVDNetParam;
 
 	typedef struct
 	{
-        OVD_DEVType devType;               //设备类型，详细可见枚举类型OVD_DevType
-        char OVDDeviceID[32];           //OVD设备ID
-        char OVDPassword[64];           //OVD接入密码
-        char OVDDevType[64];            //OVD的硬件型号
-        char OVDSystemVersion[64];      //OVD的固件版本号
-        int  period;                    //device记录的SDK周期上报的周期，单位：秒
-		OVDNetParam netParam;           //网络信息
+        OVD_DEVType devType;            //设备类型，详细可见枚举类型OVD_DevType，必填
+        char OVDDeviceID[32];           //OVD设备ID，必填
+        char OVDPassword[64];           //OVD接入密码，必填
+        char OVDDevType[64];            //OVD的硬件型号，必填
+        char OVDSystemVersion[64];      //OVD的固件版本号，必填
+        int  period;                    //device记录的SDK周期上报的周期，单位：秒，必填
+		OVDNetParam netParam;           //网络信息，必填
 	}OVDClientParam;
 
 	typedef struct
 	{
-		LogLevel logLevel;           //日志输出级别
-		LogSTD   logSTD;             //日志输出位置
-		void (*pLogOutCallBack)(char *outBuff);  //device提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中
+		LogLevel logLevel;           //日志输出级别，详细见枚举值LogLevel，可选
+		LogSTD   logSTD;             //日志输出位置，可选，详细见枚举值LogSTD，可选
+		void (*pLogOutCallBack)(char *outBuff);  //device提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中，可选，空为不支持
 	}LogParam;
 
     //日志输出基本依次增高
@@ -738,20 +708,18 @@ APP打开相关录像文件后，设备推送相关内容
 		OVD_STATUS_BUSY           =   0x07,  //系统忙
 	}OVDUpgradeStatus;
 
-	typedef enum
+	typedef struct
 	{	
-		NORMAL     = 0x00,              //正常
-		HORFLIP    = 0x01,              //水平翻转
-	  	VERFLIP    = 0x02,              //垂直翻转
-		HORVERFLIP = 0x03,              //水平垂直都翻转
+		bool horflip;              //水平翻转，true表示翻转，false表示正常,必填,
+	  	bool verflip;              //垂直翻转，true表示翻转，false表示正常,必填,
 	} MirrorFlip;
 
     typedef struct
 	{
 	    char FileName[1024];
 	    int  FileTypeMask; 				//文件类型
-		uint32_t FileStartStamp;		//录像开始时间
-		uint32_t FileEndStamp;			//录像接收时间
+		time_t FileStartStamp;		    //录像开始时间
+		time_t FileEndStamp;			//录像接收时间
 	   	int  RecordDuration; 			//时长
 	    int  FileSize; 					//文件大小
 	}OVDRecordFileInfo;
@@ -832,13 +800,13 @@ APP打开相关录像文件后，设备推送相关内容
     typedef struct
     {
 		uint8_t    channel;            //通道号
-	    char*      startTimeStamp;	   //报警开始时间戳，格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32
+	    time_t     startTimeStamp;	   //报警开始时间戳
 	    OVD_AlarmType	AlarmType;     //报警类型
         char*      desc;               //告警描述
 	    OVD_ImageInfo	ImageInfo;	   //背景图信息
     }OVD_UpLoadAlarmInfo;
 
-    typedef struct _OVD_ImageInfo
+    typedef struct
     {
 	    unsigned char *buf;    			//数据buf
 	    unsigned int  size;    			//数据长度
@@ -849,7 +817,7 @@ APP打开相关录像文件后，设备推送相关内容
     {
         OVD_OUTTER  =   0X02,      //外部告警
   	    OVD_MOTIOM	= 	0X03,      //移动侦测
-  	    OVD_BANWANG	= 	0X04,      //移动侦测
+  	    OVD_CROSS	= 	0X04,      //拌网侦测
 	    OVD_CRY		=	0x05,      //哭声侦测
 	    OVD_FACE	=	0x06,      //脸部识别
     	OVD_VOICE	=	0x07,      //声音侦测		
@@ -873,24 +841,23 @@ APP打开相关录像文件后，设备推送相关内容
 
 	typedef struct
 	{
-		char*          codec;			//编码方式，目前仅支持H264，其他不支持
-		EncodeQuality  quality;         //图像质量
-		unsigned char framerate;		//帧率, fps
-		unsigned short width;			//图像宽度
-		unsigned short height;			//图像高度
-
-		unsigned char gop;		        //每秒多少帧
-		unsigned char frameInterval;    //I帧间隔          
+		char*          codec;			//编码方式，目前仅支持H264，其他不支持，必填
+		EncodeQuality  quality;         //图像质量，必填
+		int            frameRate;		//帧率, fps，可选，负值表示未知
+		int            bitRate;		    //码流比特率, 可选，负值表示未知
+		int            width;			//图像宽度，可选，负值表示未知
+		int            height;			//图像高度，可选，负值表示未知
+		int            gop;		        //每秒多少帧，可选，负值表示未知     
 	}OVDVideoDataFormat;
 
     typedef struct
 	{
-		char*          codec;			//编码方式，目前仅支持acc，其他不支持
-		unsigned int samplesRate;		//采样率
-		unsigned short bitsPerSample;	//每采样比特数
-		unsigned short channelNumber;	//音频声道数
-		unsigned short samplePerFrame;	//每帧的采样数
-		unsigned short frameInterval;	//帧间隔, 单位ms
+		char*          codec;			//编码方式，目前仅支持acc，其他不支持，必填
+		int            samplesRate;		//采样率，可选，负值表示未知
+		int            bitRate;		    //码流比特率, 可选，负值表示未知
+		int            bitPerSample;	//位宽，即每个sample的比特数, 可选，负值表示未知
+		int            samplePerFrame;	//每帧的采样数, 可选，负值表示未知
+		int            channelNumber;	//音频声道数, 可选，负值表示未知
 	} OVDAudioDataFormat;
 
 
@@ -911,7 +878,7 @@ APP打开相关录像文件后，设备推送相关内容
 	    OVD_LOCK_OPEN		=	0x00,	   //开锁事件
 	    OVD_LOCK_PICKALARM	=	0x01,	   //撬锁事件
 	    OVD_LOCK_ADDUSER	=	0x02,	   //添加用户事件
-	    OVD_LOCK_DELUSER		=	0x03,  //删除用户事件
+	    OVD_LOCK_DELUSER	=	0x03,  //删除用户事件
 	    OVD_LOCK_DOORBELL	= 	0x04,	   //门铃事件
 	    OVD_LOCK_SYSTEMLOCK	=	0x05,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
 	    OVD_LOCK_LOWBAT		=	0x06,	   //低电报警
@@ -934,19 +901,19 @@ APP打开相关录像文件后，设备推送相关内容
 
     typedef struct
 	{
-		uint32_t		m_microsecond;	    //毫秒	0-1000
 		uint32_t 		m_year;			    //年,2009
 		uint32_t		m_month;		    //月,1-12
 		uint32_t		m_day;			    //日,1-31
 		uint32_t		m_hour;			    //0-24
 		uint32_t		m_minute;		    //0-59
 		uint32_t		m_second;		    //0-59
+		uint32_t		m_microsecond;	    //毫秒	0-1000
 	}OVDDateTime;
 
 	typedef struct
 	{
 		char ssid[33];   //wifi的ssid
-		int ssidLen;     
+		int  ssidLen;     
 		char pwd[80];    //wifi密码
-		int pwdLen;
+		int  pwdLen;
 	}WiFiInfo;
