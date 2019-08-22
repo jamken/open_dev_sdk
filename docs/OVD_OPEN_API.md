@@ -1,4 +1,4 @@
-# SDK对外开放API接口说明
+﻿# SDK对外开放API接口说明
 ## 一、设备端开放SDK集成接口说明
 **本文档描述了开放SDK与本地视音频设备之间的交互接口， 通过本说明，本地视音频设备可以通过SDK提供的统一接入能力接入到开放云平台，提供相应的服务及设置。**
 
@@ -595,37 +595,82 @@ APP打开相关录像文件后，设备推送相关内容
 
 ionSette
 ## 10 附加定义及说明
-    typedef struct
+    typedef enum
 	{
-        uint8_t channel;                //通道号， 必填
-        OVDVideoDataFormat videoinfo; 	//视频信息,必填,详细可见结构体OVDVideoDataFormat
-        OVDAudioDataFormat audioinfo; 	//视频信息,必填,详细可见结构体OVDAudioDataFormat
+		OVD_Audio	=	0,          //音频
+		OVD_Video   =	1,          //视频
+		OVD_Video_Audio   =	2,      //音视频
+	}OVD_ContentType;
+
+	typedef enum
+	{
+		RT_1DMODE  =   0, //低清
+		RT_SDMODE  =   1, //标清
+		RT_HDMODE  =   3, //高清
+		RT_FHDMODE  =  4, //全高清
+	}EncodeQuality;
+
+	typedef struct
+	{
+		char*          codec;			//编码方式，目前仅支持H264，其他不支持，必填
+		EncodeQuality  quality;         //图像质量，必填
+		int            frameRate;		//帧率, fps，可选，负值表示未知
+		int            bitRate;		    //码流比特率, 可选，负值表示未知
+		int            width;			//图像宽度，可选，负值表示未知
+		int            height;			//图像高度，可选，负值表示未知
+		int            gop;		        //每秒多少帧，可选，负值表示未知
+	}OVDVideoDataFormat;
+
+	typedef struct
+	{
+		char*          codec;			//编码方式，目前仅支持acc，其他不支持，必填
+		int            samplesRate;		//采样率，可选，负值表示未知
+		int            bitRate;		    //码流比特率, 可选，负值表示未知
+		int            bitPerSample;	//位宽，即每个sample的比特数, 可选，负值表示未知
+		int            samplePerFrame;	//每帧的采样数, 可选，负值表示未知
+		int            channelNumber;	//音频声道数, 可选，负值表示未知
+	} OVDAudioDataFormat;
+
+	typedef struct{
+		bool isEffect;                  //是否具备此能力，若设备无此能力，置为false
+		bool on;                        //是否打开此功能，在isEffect为true时有效
+		int  sensitivity;               //探测灵敏度，范围为0-100，在isEffect为true时有效
+	}AlarmInfo;
+
+	typedef struct{
+		AlarmInfo   ioAlarm;              //外部报警配置，必填
+		AlarmInfo   faceAlarm;            //人脸识别配置，必填
+		AlarmInfo   cryAlarm;             //哭声侦测配置，必填
+		AlarmInfo   voiceAlarm;           //声音侦测配置，必填
+		AlarmInfo   motionAlarm;          //移动侦测配置，必填
+		AlarmInfo   crossAlarm;           //拌网配置，必填
+	}AlarmsSet;
+
+
+	typedef struct
+	{
+		bool horflip;              //水平翻转，true表示翻转，false表示正常,必填,
+		bool verflip;              //垂直翻转，true表示翻转，false表示正常,必填,
+	} MirrorFlip;
+
+	typedef struct
+	{
+		uint8_t channel;                //通道号， 必填
+		OVDVideoDataFormat videoinfo; 	//视频信息,必填,详细可见结构体OVDVideoDataFormat
+		OVDAudioDataFormat audioinfo; 	//视频信息,必填,详细可见结构体OVDAudioDataFormat
 		MirrorFlip         flipInfo;    //图像翻转信息，必填,详见结构体MirrorFlip
-        AlarmsSet          alarms;      //各种告警设置信息，必填,详见结构体AlarmsSet
-        int                audioOutValume;  //扬声器输出音量，可选，0-100为正常值。小于0为不支持
-        bool               traceAbility;    //移动跟踪，可选，true支持跟踪，false不支持跟踪
-        int                tz;              //时区信息，必填，例如东八区为8
+		AlarmsSet          alarms;      //各种告警设置信息，必填,详见结构体AlarmsSet
+		int                audioOutValume;  //扬声器输出音量，可选，0-100为正常值。小于0为不支持
+		bool               traceAbility;    //移动跟踪，可选，true支持跟踪，false不支持跟踪
+		int                tz;              //时区信息，必填，例如东八区为8
 	}OVDConfigrationInfo;
 
-    typedef struct{
-        AlarmInfo   ioAlarm;              //外部报警配置，必填
-        AlarmInfo   faceAlarm;            //人脸识别配置，必填
-        AlarmInfo   cryAlarm;             //哭声侦测配置，必填
-        AlarmInfo   voiceAlarm;           //声音侦测配置，必填
-        AlarmInfo   motionAlarm;          //移动侦测配置，必填
-        AlarmInfo   crossAlarm;           //拌网配置，必填
-    }AlarmsSet;
 
-    typedef struct{
-        bool isEffect;                  //是否具备此能力，若设备无此能力，置为false
-        bool on;                        //是否打开此功能，在isEffect为true时有效
-        int  sensitivity;               //探测灵敏度，范围为0-100，在isEffect为true时有效
-    }AlarmInfo;
 
- 
-    typedef struct
+
+	typedef struct
 	{
-        char devId[32];                 //设备ID号，必填
+		char devId[32];                 //设备ID号，必填
 		char hardwareModel[32];         //设备型号，必填
 		char firmware_model[32];        //设备固件版本号，必填
 		char wifi_ssid[48];             //设备当前连接的wifi的ssid, 该字段空串表示未连接wifi，可选
@@ -649,14 +694,34 @@ ionSette
 		unsigned int hibernationPort;       //<休眠服务地址端口>，没有置为-1
 	}OVDNetParam;
 
+	typedef emum
+	{
+		DevType_Gun  = 1,         //枪机
+		DevType_Nvr  = 2,
+		DevType_Card  = 4,        //卡片机
+		DevType_Shake = 5,        //摇头机
+		DevType_NewCard = 6,
+		DevType_Battery = 7,
+		DevType_4G   = 8,
+		DevType_NewShake= 9,      //新摇头机 (16k全双工)
+		DevType_NewGun = 10,      //为G3S2新加
+		DevType_FaceRcgn= 11,     //人脸识别Q1
+		DevType_BatSingle = 12,   //电池单品
+		DevType_FamilyBall = 13,
+		DevType_LockI9M    = 14,
+		DevType_PtzCamera= 15,     //球机
+		DevType_Other,
+	}OVD_DEVType;
+
+
 	typedef struct
 	{
-        OVD_DEVType devType;            //设备类型，详细可见枚举类型OVD_DevType，必填
-        char OVDDeviceID[32];           //OVD设备ID，必填
-        char OVDPassword[64];           //OVD接入密码，必填
-        char OVDDevType[64];            //OVD的硬件型号，必填
-        char OVDSystemVersion[64];      //OVD的固件版本号，必填
-        int  period;                    //device记录的SDK周期上报的周期，单位：秒，必填
+		OVD_DEVType devType;            //设备类型，详细可见枚举类型OVD_DevType，必填
+		char OVDDeviceID[32];           //OVD设备ID，必填
+		char OVDPassword[64];           //OVD接入密码，必填
+		char OVDDevType[64];            //OVD的硬件型号，必填
+		char OVDSystemVersion[64];      //OVD的固件版本号，必填
+		int  period;                    //device记录的SDK周期上报的周期，单位：秒，必填
 		OVDNetParam netParam;           //网络信息，必填
 	}OVDClientParam;
 
@@ -667,22 +732,22 @@ ionSette
 		void (*pLogOutCallBack)(char *outBuff);  //device提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中，可选，空为不支持
 	}LogParam;
 
-    //日志输出基本依次增高
-    typedef enum{
-        OVD_LOGLEVEL_TRACE = 0, 
-        OVD_LOGLEVEL_DEBUG = 1,
+	//日志输出基本依次增高
+	typedef enum{
+		OVD_LOGLEVEL_TRACE = 0,
+		OVD_LOGLEVEL_DEBUG = 1,
 		OVD_LOGLEVEL_INFO  = 2,
 		OVD_LOGLEVEL_WARN  = 3,
 		OVD_LOGLEVEL_ERROR = 4,
-        OVD_LOGLEVEL_FATAL = 5,
-    }LogLevel;
+		OVD_LOGLEVEL_FATAL = 5,
+	}LogLevel;
 
-    //日志输出位置
-    typedef enum{
-        OVD_LOGSTD_OUT = 0,  //标准输出
-        OVD_LOGSTD_ERR = 1,  //标准异常
+	//日志输出位置
+	typedef enum{
+		OVD_LOGSTD_OUT = 0,  //标准输出
+		OVD_LOGSTD_ERR = 1,  //标准异常
 		OVD_LOGSTD_NO  = 2,  //不输出
-    }LogSTD;
+	}LogSTD;
 
 	typedef enum
 	{
@@ -696,22 +761,17 @@ ionSette
 		OVD_STATUS_BUSY           =   7,  //系统忙
 	}OVDUpgradeStatus;
 
-	typedef struct
-	{	
-		bool horflip;              //水平翻转，true表示翻转，false表示正常,必填,
-	  	bool verflip;              //垂直翻转，true表示翻转，false表示正常,必填,
-	} MirrorFlip;
 
-    typedef struct
+	typedef struct
 	{
-	    char FileName[1024];
-	    int  FileTypeMask; 				//文件类型
+		char FileName[1024];
+		int  FileTypeMask; 				//文件类型
 		time_t FileStartStamp;		    //录像开始时间
 		time_t FileEndStamp;			//录像接收时间
-	   	int  RecordDuration; 			//时长
-	    int  FileSize; 					//文件大小
+		int  RecordDuration; 			//时长
+		int  FileSize; 					//文件大小
 	}OVDRecordFileInfo;
-	
+
 	typedef struct
 	{
 		int               fileCount;            //文件数量
@@ -767,127 +827,45 @@ ionSette
 		MP3_OTHER,
 	}OVD_Mp3PlayCtrl;
 
-    typedef emum{
-        DevType_Gun  = 1,         //枪机
-        DevType_Nvr  = 2,  
-        DevType_Card  = 4,        //卡片机
-        DevType_Shake = 5,        //摇头机
-        DevType_NewCard = 6,
-        DevType_Battery = 7, 
-        DevType_4G   = 8,
-        DevType_NewShake= 9,      //新摇头机 (16k全双工)
-        DevType_NewGun = 10,      //为G3S2新加 
-        DevType_FaceRcgn= 11,     //人脸识别Q1 
-        DevType_BatSingle = 12,   //电池单品 
-        DevType_FamilyBall = 13, 
-        DevType_LockI9M    = 14,
-        DevType_PtzCamera= 15     //球机
-        DevType_Other,
-    }OVD_DEVType;
+	typedef struct
+	{
+		unsigned char *buf;    			//数据buf
+		unsigned int  size;    			//数据长度
+		char		  ImageUrl[1024];	//目前没用到,可填空
+	}OVD_ImageInfo;
 
-    typedef struct
-    {
-		uint8_t    channel;            //通道号
-	    time_t     startTimeStamp;	   //报警开始时间戳
-	    OVD_AlarmType	AlarmType;     //报警类型
-        char*      desc;               //告警描述
-	    OVD_ImageInfo	ImageInfo;	   //背景图信息
-    }OVD_UpLoadAlarmInfo;
-
-    typedef struct
-    {
-	    unsigned char *buf;    			//数据buf
-	    unsigned int  size;    			//数据长度
-	    char		  ImageUrl[1024];	//目前没用到,可填空
-    }OVD_ImageInfo;
-
-    typedef enum
-    {
-        OVD_OUTTER  =   1,      //外部告警
-  	    OVD_MOTIOM	= 	2,      //移动侦测
-  	    OVD_CROSS	= 	3,      //拌网侦测
-	    OVD_CRY		=	4,      //哭声侦测
-	    OVD_FACE	=	5,      //脸部识别
-    	OVD_VOICE	=	6,      //声音侦测		
-    	OVD_OTHER,	
-    }OVD_AlarmType;
-
-    typedef enum
-    {
-	    OVD_Audio	=	0,          //音频
-	    OVD_Video   =	1,          //视频
-        OVD_Video_Audio   =	2,      //音视频
-    }OVD_ContentType;
-
-    typedef enum
-    {
-	    RT_1DMODE  =   0, //低清
-	    RT_SDMODE  =   1, //标清
-	    RT_HDMODE  =   3, //高清
-	    RT_FHDMODE  =  4, //全高清
-    }EncodeQuality;
+	typedef enum
+	{
+		OVD_OUTTER  =   1,      //外部告警
+		OVD_MOTIOM	= 	2,      //移动侦测
+		OVD_CROSS	= 	3,      //拌网侦测
+		OVD_CRY		=	4,      //哭声侦测
+		OVD_FACE	=	5,      //脸部识别
+		OVD_VOICE	=	6,      //声音侦测
+		OVD_OTHER,
+	}OVD_AlarmType;
 
 	typedef struct
 	{
-		char*          codec;			//编码方式，目前仅支持H264，其他不支持，必填
-		EncodeQuality  quality;         //图像质量，必填
-		int            frameRate;		//帧率, fps，可选，负值表示未知
-		int            bitRate;		    //码流比特率, 可选，负值表示未知
-		int            width;			//图像宽度，可选，负值表示未知
-		int            height;			//图像高度，可选，负值表示未知
-		int            gop;		        //每秒多少帧，可选，负值表示未知     
-	}OVDVideoDataFormat;
+		uint8_t    channel;            //通道号
+		time_t     startTimeStamp;	   //报警开始时间戳
+		OVD_AlarmType	AlarmType;     //报警类型
+		char*      desc;               //告警描述
+		OVD_ImageInfo	ImageInfo;	   //背景图信息
+	}OVD_UpLoadAlarmInfo;
 
-    typedef struct
-	{
-		char*          codec;			//编码方式，目前仅支持acc，其他不支持，必填
-		int            samplesRate;		//采样率，可选，负值表示未知
-		int            bitRate;		    //码流比特率, 可选，负值表示未知
-		int            bitPerSample;	//位宽，即每个sample的比特数, 可选，负值表示未知
-		int            samplePerFrame;	//每帧的采样数, 可选，负值表示未知
-		int            channelNumber;	//音频声道数, 可选，负值表示未知
-	} OVDAudioDataFormat;
+	typedef enum {
+		OVD_LOCK_OPEN		=	0,	   //开锁事件
+		OVD_LOCK_PICKALARM	=	1,	   //撬锁事件
+		OVD_LOCK_ADDUSER	=	2,	   //添加用户事件
+		OVD_LOCK_DELUSER	=	3,  //删除用户事件
+		OVD_LOCK_DOORBELL	= 	4,	   //门铃事件
+		OVD_LOCK_SYSTEMLOCK	=	5,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
+		OVD_LOCK_LOWBAT		=	6,	   //低电报警
+		OVD_LOCK_RESET		=	7,	   //恢复出厂设置报警
+	}OVDLockMsgType;
 
-
-    typedef struct{
-	    OVDLockMsgType	msgType;			//消息类型
-
-	    //msgType 为 OVD_LOCK_OPEN 才起作用	
-	    OVDLockOpenInfo	openInfo;			//开锁信息
-
-        //msgType 为 OVD_LOCK_ADDUSER 或者 OVD_LOCK_DELUSER 才起作用	
-	    OVDLockUserInfo	userInfo;			//添加/删除用户的详细信息
-
-        //msgType 为 OVD_LOCK_LOWBAT 才起作用	
-	    uint8_t			Electric;			//低电报警时附带的电量 1~100
-    }OVDLockMsgInfo;
-
-    typedef enum {
-	    OVD_LOCK_OPEN		=	0,	   //开锁事件
-	    OVD_LOCK_PICKALARM	=	1,	   //撬锁事件
-	    OVD_LOCK_ADDUSER	=	2,	   //添加用户事件
-	    OVD_LOCK_DELUSER	=	3,  //删除用户事件
-	    OVD_LOCK_DOORBELL	= 	4,	   //门铃事件
-	    OVD_LOCK_SYSTEMLOCK	=	5,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
-	    OVD_LOCK_LOWBAT		=	6,	   //低电报警
-	    OVD_LOCK_RESET		=	7,	   //恢复出厂设置报警
-    }OVDLockMsgType;
-
-    typedef struct 
-	{
-		char			Name[128]; 		   //开锁用户名称
-		OVDDateTime		UnlockTime;		   //开锁时间
-		OVDUnlockType	UnlockType;		   //开锁类型
-		uint32_t		UserNumber;		   //开锁用户编号
-	}OVDLockOpenInfo;
-
-	typedef struct 
-	{
-		OVDUnlockType	 UnlockType;		//对应用户录入的开锁类型
-		uint32_t		 UserNumber;		//对应用户录入的用户编号
-	}OVDLockUserInfo;
-
-    typedef struct
+	typedef struct
 	{
 		uint32_t 		m_year;			    //年,2009
 		uint32_t		m_month;		    //月,1-12
@@ -898,10 +876,50 @@ ionSette
 		uint32_t		m_microsecond;	    //毫秒	0-1000
 	}OVDDateTime;
 
+	typedef enum
+	{
+		LOCK_KEY		=	0x00,  //钥匙开锁
+		LOCK_PSW		=	0x01,  //密码开锁
+		LOCK_FINGER		=	0x02,  //指纹开锁
+		LOCK_CARD		=	0x03,  //门卡开锁
+		LOCK_REMOTE		=	0x04,  //遥控开锁
+		LOCK_PICK		=	0x05,  //撬锁
+		LOCK_TEMPPSW	=	0x06,  //临时密码开锁
+		LOCK_OTHER,
+	}OVDUnlockType;
+
+	typedef struct
+	{
+		char			Name[128]; 		   //开锁用户名称
+		OVDDateTime		UnlockTime;		   //开锁时间
+		OVDUnlockType	UnlockType;		   //开锁类型
+		uint32_t		UserNumber;		   //开锁用户编号
+	}OVDLockOpenInfo;
+
+	typedef struct
+	{
+		OVDUnlockType	 UnlockType;		//对应用户录入的开锁类型
+		uint32_t		 UserNumber;		//对应用户录入的用户编号
+	}OVDLockUserInfo;
+
+
+	typedef struct{
+		OVDLockMsgType	msgType;			//消息类型
+
+		//msgType 为 OVD_LOCK_OPEN 才起作用
+		OVDLockOpenInfo	openInfo;			//开锁信息
+
+		//msgType 为 OVD_LOCK_ADDUSER 或者 OVD_LOCK_DELUSER 才起作用
+		OVDLockUserInfo	userInfo;			//添加/删除用户的详细信息
+
+		//msgType 为 OVD_LOCK_LOWBAT 才起作用
+		uint8_t			Electric;			//低电报警时附带的电量 1~100
+	}OVDLockMsgInfo;
+
 	typedef struct
 	{
 		char ssid[64];   //wifi的ssid
-		int  ssidLen;     
+		int  ssidLen;
 		char pwd[80];    //wifi密码
 		int  pwdLen;
 	}WiFiInfo;
