@@ -21,7 +21,7 @@
 ### 接口描述
 设备上电后调用
 ### 接口定义
-**`int32_t OVD_Init(void *userData, OVDClientParam clientParam, OVDLogParam logParam, OVD_CallBackFunList callBackFunList)`**
+**`int OVD_Init(void *userData, OVDClientParam clientParam, OVDLogParam logParam, OVD_CallBackFunList callBackFunList)`**
 
 ### 参数说明：
     [in]clientParam:       云服务器地址及端口号，见OVDClientParam结构体
@@ -58,7 +58,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 设备检测到告警条件，触发告警
 ### 接口定义
-**`int32_t OVD_AlarmInfoStart(void *userData,OVDUpLoadAlarmInfo alarmInfo)`**
+**`int OVD_AlarmInfoStart(void *userData,OVDUpLoadAlarmInfo alarmInfo)`**
 ### 参数说明：
     [in]alarmInfo:    报警信息结构体，详细可见结构体描述OVDUpLoadAlarmInfo
 ### 返回值：
@@ -70,7 +70,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 设备告警结束
 ### 接口定义
-**`int32_t OVD_AlarmInfoEnd(void *userData,uint8_t channel, OVDAlarmType alarmType,char* endTimeStamp)`**
+**`int OVD_AlarmInfoEnd(void *userData,int channel, OVDAlarmType alarmType,char* endTimeStamp)`**
 ### 参数说明：
     [in]channel;        通道号
     [in]alarmType:      告警类型，详细可见枚举OVDAlarmType
@@ -85,7 +85,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 设备准备好音频、视频或者音视频，开始准备发送
 ### 接口定义
-**`int32_t OVD_AVPushStart(void *userData,uint8_t channel,OVDContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
+**`int OVD_AVPushStart(void *userData,int channel,OVDContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
 ### 参数说明：
     [in]channel:         通道号
     [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
@@ -100,7 +100,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 设备向SDK推动音视频内容
 ### 接口定义
-**`int32_t OVD_AVPushData(void *userData,uint8_t channel,OVDContentType contentType,char isIFrame,void* contentData,uint32_t dataLen,time_t timestamp)`**
+**`int OVD_AVPushData(void *userData,int channel,OVDContentType contentType,char isIFrame,void* contentData,int dataLen,time_t timestamp)`**
 ### 参数说明：
     [in]channel:         通道号
     [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
@@ -115,7 +115,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 
 ### 5.3 音视频内容传送结束接口
 ### 接口定义
-**`int32_t OVD_AVPushEnd(void *userData,uint8_t channel,OVDContentType contentType)`**
+**`int OVD_AVPushEnd(void *userData,int channel,OVDContentType contentType)`**
 ### 参数说明：
     [in]channel:         通道号
     [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
@@ -128,7 +128,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 已经启动音视频传送后，若设备的音视频参数修改，则调用此接口通知sdk变动的参数
 ### 接口定义
-**`int32_t OVD_AVParamModify(void *userData,uint8_t channel,OVDContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
+**`int OVD_AVParamModify(void *userData,int channel,OVDContentType contentType,OVDVideoDataFormat videoinfo,OVDAudioDataFormat audeoinfo)`**
 ### 参数说明：
     [in]channel:         通道号
     [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
@@ -144,7 +144,7 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 APP打开相关录像文件后，设备推送相关内容
 *录像内容查询、打开录像文件、录像文件控制、录像删除等功能，由回调函数定义，详见（SDK初始化）的参数定义*
 ### 接口定义
-**`int32_t OVD_SendRecordAVContent(void *userData,uint8_t channel,OVDContentType contentType,char isIFrame,char isIFrame,void* contentData,uint32_t videoDataLen,time_t timestamp)`**
+**`int OVD_SendRecordAVContent(void *userData,int channel,OVDContentType contentType,char isIFrame,char isIFrame,void* contentData,int videoDataLen,time_t timestamp)`**
 ### 参数说明：
     [in]channel:         通道号
     [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
@@ -175,7 +175,7 @@ APP打开相关录像文件后，设备推送相关内容
 ### 接口描述
 设备开始声波配网后，获取到音频文件，发送到SDK识别；SDK识别完后，调用回调end_cbfunc返回配网信息
 ### 接口定义
-**`int32_t OVD_SoundWaveStart(void *recognizer,RecognizStart start_cbfunc,RecognizEnd end_cbfunc)`**
+**`int OVD_SoundWaveStart(void *recognizer,RecognizStart start_cbfunc,RecognizEnd end_cbfunc)`**
 ### 参数说明：
     [in]recognizer:      声波句柄
     [in]start_cbfunc:    识别开始回调函数，定义为 typedef void (*RecognizStart)(void);
@@ -189,7 +189,7 @@ APP打开相关录像文件后，设备推送相关内容
 ### 接口描述
 设备开始声波配网后，把声波数据传入SDK的识别器
 ### 接口定义
-**`int32_t OVD_SoundWaveWriteData(void *recognizer,const void *data,unsigned long len)`**
+**`int OVD_SoundWaveWriteData(void *recognizer,const void *data,unsigned long len)`**
 ### 参数说明：
     [in]recognizer:      声波句柄
     [in]data:            声波数据的首字节指针
@@ -203,7 +203,7 @@ APP打开相关录像文件后，设备推送相关内容
 ### 接口描述
 识别完后，调用此接口
 ### 接口定义
-**`int32_t OVD_SoundWaveStop(void *recognizer)`**
+**`int OVD_SoundWaveStop(void *recognizer)`**
 ### 参数说明：
     [in]recognizer:      声波句柄
 ### 返回值：
@@ -214,7 +214,7 @@ APP打开相关录像文件后，设备推送相关内容
 ## 8 门锁端特殊接口
 ### 7.1 上报门锁操作消息(开锁/增删用户/系统锁定/系统恢复出厂设置等等)
 ### 接口定义
-**`int32_t OVD_LockUploadMsgInfo(void *userData,OVDLockMsgInfo lockinfo)`**
+**`int OVD_LockUploadMsgInfo(void *userData,OVDLockMsgInfo lockinfo)`**
 ### 参数说明：
     [in]lockinfo:        锁端消息信息,详细可见结构体描述OVDLockMsgInfo
 ### 返回值：
@@ -235,7 +235,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetOVDDeviceInfo)(void *userData,OVDDeviceInfo *deviceInfo);        
+        int (*OVD_GetOVDDeviceInfo)(void *userData,OVDDeviceInfo *deviceInfo);        
 
 
         //设备端信息获取接口，开放平台获取设备的配置信息
@@ -247,7 +247,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetOVDConfigureInfo)(void *userData,OVDConfigrationInfo *configureInfo);
+        int (*OVD_GetOVDConfigureInfo)(void *userData,OVDConfigrationInfo *configureInfo);
 
 
         //配置设备端信息接口，开放平台设置设备的配置信息
@@ -259,7 +259,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVC_SetOVDConfigureInfo)(void *userData,OVDConfigrationInfo configureSetter);
+        int (*OVC_SetOVDConfigureInfo)(void *userData,OVDConfigrationInfo configureSetter);
 
 
         //重启channel，通过此接口去重启特定的channel。注：如设备不支持单独重启channel，则直接重启设备。
@@ -271,7 +271,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_ReBootChannel)(void *userData,uint8_t channel);
+        int (*OVD_ReBootChannel)(void *userData,int channel);
 
 
         //重启设备，通过此接口去重启设备。
@@ -283,7 +283,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_ReBootDevice)(void *userData);
+        int (*OVD_ReBootDevice)(void *userData);
 
 
         //恢复配置到出厂状态
@@ -295,7 +295,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_ResetConfiguration)(void *userData,char iskeepNetConfigre);
+        int (*OVD_ResetConfiguration)(void *userData,char iskeepNetConfigre);
 
 
         //按页查询录像文件
@@ -316,7 +316,7 @@ APP打开相关录像文件后，设备推送相关内容
         **其他说明:
         **    假设查询的录像文件数有200个，numInPage=10，则最大页码Page为20。若传进的参数numInPage=10，page=2，则fileInPage应该返回第10个到第20个录像的信息;若传进的参数numInPage=10，page=21，则fileInPage返回空录像信息(录像个数为0)                     
         */
-        int32_t (*OVD_QueryRecordPage)(void *userData,uint8_t channel,uint8_t recordType,uint32_t StartStamp,uint32_t EndStamp,uint32_t Page,uint32_t PageNum,OVDRecordFileListPerPage *FilePage);
+        int (*OVD_QueryRecordPage)(void *userData,int channel,int recordType,int StartStamp,int EndStamp,int Page,int PageNum,OVDRecordFileListPerPage *FilePage);
 
 
         //打开录像文件
@@ -332,7 +332,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_OpenRecordFile)(void *userData,uint8_t channel,char* recordname,OVDVideoDataFormat* videoInfo,OVDAudioDataFormat* audioInfo,uint32_t* fileTotalTime);
+        int (*OVD_OpenRecordFile)(void *userData,int channel,char* recordname,OVDVideoDataFormat* videoInfo,OVDAudioDataFormat* audioInfo,int* fileTotalTime);
 
 
         //录像文件控制
@@ -346,7 +346,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_RecordCotrol)(void *userData,uint8_t channel,OVDCONTROLTYPE controlType,uint32_t value);
+        int (*OVD_RecordCotrol)(void *userData,int channel,OVDCONTROLTYPE controlType,int value);
 
         //录像文件删除
         /*
@@ -357,7 +357,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_RecordFileDelete)(void *userData,char* recordname);
+        int (*OVD_RecordFileDelete)(void *userData,char* recordname);
 
 
         //设备升级接口，开放平台上传新的升级包，制定升级策略后，调用此接口通知设备进行版本升级。由设备根据提供的URL去下载升级包升级
@@ -370,7 +370,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_FirmwareUpgrade)(void *userData,char *firmware_model, char *upgradeURL);
+        int (*OVD_FirmwareUpgrade)(void *userData,char *firmware_model, char *upgradeURL);
 
 
         //设备升级状态查询，开放平台上在下发固件升级后，会不定期的查询升级状态及进度。设备通过此接口返回当前的升级状态及进度
@@ -384,7 +384,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_QueryFirmwareUpgradeStatus)(void *userData,char *firmware_model, OVDUpgradeStatus *upgradeStatus, int *upgradeProgress);
+        int (*OVD_QueryFirmwareUpgradeStatus)(void *userData,char *firmware_model, OVDUpgradeStatus *upgradeStatus, int *upgradeProgress);
 
 
         //设备时间同步，由开放平台发起时间同步；由于网络延迟，若设备上的原有时间与服务器同步的时间的偏差在offset秒之内，则设备无需同步时间
@@ -397,7 +397,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_SyncTime)(void *userData,char *time, int offset);        
+        int (*OVD_SyncTime)(void *userData,char *time, int offset);        
 
 
         //设备时间查询，查询设备上当前的时间
@@ -409,7 +409,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_QueryTime)(void *userData,char *time);  
+        int (*OVD_QueryTime)(void *userData,char *time);  
 
 
         //获取SD卡信息
@@ -421,7 +421,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetSDInfo)(void *userData,OVDSDInfo *sdInfo);
+        int (*OVD_GetSDInfo)(void *userData,OVDSDInfo *sdInfo);
 
 
         //格式化SD卡
@@ -433,7 +433,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_SetSDCardFormat)(void *userData);       
+        int (*OVD_SetSDCardFormat)(void *userData);       
 
 
         //云台控制设备，控制设备转动，携带转动速度。注：若设备不支持，则可忽略speed值
@@ -447,7 +447,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_PTZCmd)(void *userData,uint8_t channel,OVCPTZControlCmd ptzcmd,int speed);
+        int (*OVD_PTZCmd)(void *userData,int channel,OVCPTZControlCmd ptzcmd,int speed);
 
         //获取设备预置点列表信息
         /*
@@ -460,7 +460,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetPresetList)(void *userData,uint8_t channel,int *presetList, int *count);
+        int (*OVD_GetPresetList)(void *userData,int channel,int *presetList, int *count);
 
 
         //打开对讲接口，准备与APP对讲
@@ -477,7 +477,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_AudioPlayStart)(void *userData,uint8_t channel,OVDAUDIOPLY_TYPE encordType,int32_t sampleRate,int32_t bitWidth,uint32_t volume,int priority);
+        int (*OVD_AudioPlayStart)(void *userData,int channel,OVDAUDIOPLY_TYPE encordType,int sampleRate,int bitWidth,int volume,int priority);
 
 
         //播放对讲音频，SDK收到APP端的音频数据后，通知设备端播放
@@ -489,9 +489,9 @@ APP打开相关录像文件后，设备推送相关内容
         **    
         **返回值：
         **    成功：0
-        **    失败：其他值
+        **    失败：其他值f
         */
-        int32_t (*OVD_AudioPlayProGress)(void *userData,uint8_t channel,uint8_t* buf, int32_t size);
+        int (*OVD_AudioPlayProGress)(void *userData,int channel,char* buf, int size);
 
 
         //关闭对讲接口，APP端对讲结束，或者一段时间内SDK未收到APP端的数据，则调用此接口
@@ -503,7 +503,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_AudioPlayStop)(void *userData,uint8_t channel);
+        int (*OVD_AudioPlayStop)(void *userData,int channel);
 
 
         //强制出I帧，通知视频强制出一个I帧
@@ -515,7 +515,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_ForceIFrame)(void *userData,uint8_t channel);
+        int (*OVD_ForceIFrame)(void *userData,int channel);
 
         //截图，截取当前的视频画面
         /*
@@ -527,7 +527,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_Snapshot)(void *userData,uint8_t channel,OVDImageInfo *imageInfo);
+        int (*OVD_Snapshot)(void *userData,int channel,OVDImageInfo *imageInfo);
 
 
         //音乐播放，服务器端给定播放的url，有设备去下载歌曲并播放
@@ -541,7 +541,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_SetMp3Url)(void *userData,uint8_t channel,char url[1024],int priority);
+        int (*OVD_SetMp3Url)(void *userData,int channel,char url[1024],int priority);
 
 
         //音乐播放控制，服务器端控制音乐播放 停止、暂停、继续。
@@ -554,7 +554,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_Mp3PlayCtrl)(void *userData,uint8_t channel,OVDMp3PlayCtrl ctrl);
+        int (*OVD_Mp3PlayCtrl)(void *userData,int channel,OVDMp3PlayCtrl ctrl);
 
 
         //获取音乐播放状态，当前正在播放的音乐文件的URL，该域不存在或者空串表示当前未播放
@@ -567,7 +567,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetMp3PlayStatus)(void *userData,uint8_t channel,char url[1024]);
+        int (*OVD_GetMp3PlayStatus)(void *userData,int channel,char url[1024]);
 
 
         //设置门锁端的时间
@@ -579,7 +579,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_SetLockTime)(void *userData,OVDDateTime timeInfo);
+        int (*OVD_SetLockTime)(void *userData,OVDDateTime timeInfo);
 
 
         //获取门锁端的时间
@@ -591,7 +591,7 @@ APP打开相关录像文件后，设备推送相关内容
         **    成功：0
         **    失败：其他值
         */
-        int32_t (*OVD_GetLockTime)(void *userData,OVDDateTime *timeInfo);
+        int (*OVD_GetLockTime)(void *userData,OVDDateTime *timeInfo);
 
     }OVD_CallBackFunList;
 
@@ -654,7 +654,7 @@ APP打开相关录像文件后，设备推送相关内容
 	}OVDMirrorFlip;
 
 	typedef struct{
-		uint8_t channel;                //通道号， 必填
+		int channel;                //通道号， 必填
 		OVDVideoDataFormat videoinfo; 	//视频信息,必填,详细可见结构体OVDVideoDataFormat
 		OVDAudioDataFormat audioinfo; 	//视频信息,必填,详细可见结构体OVDAudioDataFormat
 		OVDMirrorFlip         flipInfo;    //图像翻转信息，必填,详见结构体OVDMirrorFlip
@@ -688,13 +688,13 @@ APP打开相关录像文件后，设备推送相关内容
 	typedef struct
 	{
 		char passDomain[128];        //<云服务器的域名>，必填
-		unsigned int passPort;       //<云服务器的端口>，必填
+		int  passPort;       //<云服务器的端口>，必填
 		char p2p_passDomain[128];    // <P2P pass 的域名>，必填
-		unsigned int p2p_passPort;   //<杭研p2p pass的端口>，必填
+		int  p2p_passPort;   //<杭研p2p pass的端口>，必填
 		char turnDomain[128];        //<P2P turn的域名>，没有置为空
-		unsigned int turnPort;       //<p2p turn 的端口>，没有置为-1
+		int  turnPort;       //<p2p turn 的端口>，没有置为-1
 		char hibernationDomain[128];        //<休眠服务地址域名>，没有置为空
-		unsigned int hibernationPort;       //<休眠服务地址端口>，没有置为-1
+		int  hibernationPort;       //<休眠服务地址端口>，没有置为-1
 	}OVDNetParam;
 
 	typedef emum
@@ -832,8 +832,8 @@ APP打开相关录像文件后，设备推送相关内容
 
 	typedef struct
 	{
-		unsigned char *buf;    			//数据buf
-		unsigned int  size;    			//数据长度
+		char *buf;    			//数据buf
+		int  size;    			//数据长度
 		//char		  ImageUrl[1024];	//目前没用到,可填空
 	}OVDImageInfo;
 
@@ -850,7 +850,7 @@ APP打开相关录像文件后，设备推送相关内容
 
 	typedef struct
 	{
-		uint8_t    channel;            //通道号
+		int        channel;            //通道号
 		time_t     startTimeStamp;	   //报警开始时间戳
 		OVDAlarmType	AlarmType;     //报警类型
 		char*      desc;               //告警描述
@@ -870,13 +870,13 @@ APP打开相关录像文件后，设备推送相关内容
 
 	typedef struct
 	{
-		uint32_t 		m_year;			    //年,2009
-		uint32_t		m_month;		    //月,1-12
-		uint32_t		m_day;			    //日,1-31
-		uint32_t		m_hour;			    //0-24
-		uint32_t		m_minute;		    //0-59
-		uint32_t		m_second;		    //0-59
-		uint32_t		m_microsecond;	    //毫秒	0-1000
+		int 		m_year;			    //年,2009
+		int		m_month;		    //月,1-12
+		int		m_day;			    //日,1-31
+		int		m_hour;			    //0-24
+		int		m_minute;		    //0-59
+		int		m_second;		    //0-59
+		int		m_microsecond;	    //毫秒	0-1000
 	}OVDDateTime;
 
 	typedef enum
@@ -896,13 +896,13 @@ APP打开相关录像文件后，设备推送相关内容
 		char			Name[128]; 		   //开锁用户名称
 		OVDDateTime		UnlockTime;		   //开锁时间
 		OVDUnlockType	UnlockType;		   //开锁类型
-		uint32_t		UserNumber;		   //开锁用户编号
+		int      		UserNumber;		   //开锁用户编号
 	}OVDLockOpenInfo;
 
 	typedef struct
 	{
 		OVDUnlockType	 UnlockType;		//对应用户录入的开锁类型
-		uint32_t		 UserNumber;		//对应用户录入的用户编号
+		int     		 UserNumber;		//对应用户录入的用户编号
 	}OVDLockUserInfo;
 
 
@@ -916,7 +916,7 @@ APP打开相关录像文件后，设备推送相关内容
 		OVDLockUserInfo	userInfo;			//添加/删除用户的详细信息
 
 		//msgType 为 OVD_LOCK_LOWBAT 才起作用
-		uint8_t			Electric;			//低电报警时附带的电量 1~100
+		int   			Electric;			//低电报警时附带的电量 1~100
 	}OVDLockMsgInfo;
 
 	typedef struct
