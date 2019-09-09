@@ -70,11 +70,11 @@ wifi断线时调用，通知SDK网络异常，停止网络重试等操作
 ### 接口描述
 设备告警结束
 ### 接口定义
-**`int OVD_AlarmInfoEnd(void *userData,int channel, OVDAlarmType alarmType,char* endTimeStamp)`**
+**`int OVD_AlarmInfoEnd(void *userData,int channel, OVDAlarmType alarmType,time_t endTimeStamp)`**
 ### 参数说明：
     [in]channel;        通道号
     [in]alarmType:      告警类型，详细可见枚举OVDAlarmType
-	[in]endTimeStamp:   报警结束时间戳，格式YY-MM-DDTHH:MM:SS，例子：2016-12-05T02:15:32
+	[in]endTimeStamp:   报警结束时间戳
 ### 返回值：
     成功：0
     失败：其他值
@@ -316,7 +316,7 @@ APP打开相关录像文件后，设备推送相关内容
         **其他说明:
         **    假设查询的录像文件数有200个，numInPage=10，则最大页码Page为20。若传进的参数numInPage=10，page=2，则fileInPage应该返回第10个到第20个录像的信息;若传进的参数numInPage=10，page=21，则fileInPage返回空录像信息(录像个数为0)                     
         */
-        int (*OVD_QueryRecordPage)(void *userData,int channel,int recordType,int StartStamp,int EndStamp,int Page,int PageNum,OVDRecordFileListPerPage *FilePage);
+        int (*OVD_QueryRecordPage)(void *userData,int channel,int recordType,time_t StartStamp,time_t EndStamp,int Page,int PageNum,OVDRecordFileListPerPage *FilePage);
 
 
         //打开录像文件
