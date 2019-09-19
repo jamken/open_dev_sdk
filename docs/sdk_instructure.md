@@ -1,11 +1,11 @@
 # SDK架构说明及接入方法
 ## 一、SDK目录及说明
-###1、目录架构
+### 1、目录架构
 	SDK目录架构如下：
 	![SDK目录架构](sdkcontent.png)
 
-###2、目录说明
-####2.1 config目录
+### 2、目录说明
+#### 2.1 config目录
     功能：主要配置编译连接时的参数
 
 	config目录里包含XXX(设备型号标识).config , 在这个config文件内容参考如下：
@@ -43,31 +43,31 @@
 	CUSTOM_CFLAGS 是设备特定的编译参数，由厂商提供和填入。
 
 
-####2.2 environment.mk 和 Makefile 文件
+#### 2.2 environment.mk 和 Makefile 文件
 	sdk主目录上的主Makefile
 
-####2.3 include目录
+#### 2.3 include目录
 	放置sdk对外提供的头文件
 	OVD_OpenAPI.h：SDK对外提供的接口文件
 
-####2.4 lib目录
+#### 2.4 lib目录
 	放置sdk对外提供的静态库libovd.a和libcjson.a
 
 	libovd.a: SDK主要对外提供的接口实现
 	libcjson.a: SDK提供的json库
 	*注：libcjson.a 提供了通用json接口实现，若厂商自带有cjson库，后期移植时可自行斟酌是否引用SDK提供的libcjson.a*
 	 
-####2.5 doc目录
+#### 2.5 doc目录
 	sdk对外提供的文档
 
-####2.6 demo目录
+#### 2.6 demo目录
 	功能：demo模块执行文件将模拟为一个设备，可进行注册、配网、推流、告警等一整套流程。
 
 	src:   放置demo 源码文件, 演示和配置文件
 	Makefile: demo 模块的 Makefile
 	build: 放置demo模块编译生成文件
 	
-####2.7 samples目录
+#### 2.7 samples目录
 	功能：samples模块为各自流程的模拟程序，每个子程序可独立执行。提供集成参考。
 
 	include, src： 放置sample模块的源文件和头文件
