@@ -55,7 +55,7 @@
 
 	libovd.a: SDK主要对外提供的接口实现
 	libcjson.a: SDK提供的json库
-	*注：libcjson.a 提供了通用json接口实现，若厂商自带有cjson库，后期移植时可自行斟酌是否引用SDK提供的libcjson.a*
+	注：libcjson.a 提供了通用json接口实现，若厂商自带有cjson库，后期移植时可自行斟酌是否引用SDK提供的libcjson.a
 	 
 #### 2.5 doc目录
 	sdk对外提供的文档
@@ -76,7 +76,7 @@
 	build: 放置sample模块编译生成文件
 	
 	sample模块提供几个情景下的sample实例：
-		1.sample_init   演示sdk初始化话动作
+		1.sample_init   演示sdk初始化动作
 		2.sample_pic_net 演示sdk 二维码识别配网动作
 		3.sample_wave_net 演示sdk 声波配网动作
 		4.sample_service_ok 演示sdk 连接云服务器
@@ -86,9 +86,9 @@
 
 
 ## 二、接口使用流程说明
-### SDK接入的调用流程图（请关注流程图后的注意事项）
+### 1 SDK接入的调用流程图（请关注流程图后的注意事项）
    ![SDK流程图](detailedflowchart.jpg)
-### 接入流程注意事项
+### 2 接入流程注意事项
    
 - 建议设备按照流程图的步骤1、2、3、4、5进行接口调用，其中步骤4各子流程可以并行执行。
 - 设备上电初始化后，若还未配置网络，则调用SDK提供的 *声波配网* 或者 *二维码配网* 方法进行配网；设备有自由配网方式，可以忽略SDK的方法。
@@ -114,9 +114,7 @@
 ## 1 编译链接
 1. demo模拟设备运行，其设备本身的参数配置在demo/configure目录下
 2. demo模拟设备时的音视频内容，放置在demo/resource目录下，视频仅支持H264格式，音频仅支持AAC格式
-3. 进入demo目录
-4. 执行make命令
-5. 编译成功后，生成的可执行文件在demo/build/x86_64/bin目录下
+3. 按照第三部分的第三节“集成SDK编译流程”进行编译
 
 ## 2 demo执行过程说明
 1. 在demo/build/x86_64/bin目录下执行 ./demo，然后按照提示进行输入，引导程序继续执行
