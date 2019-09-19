@@ -9,6 +9,7 @@
    dap
    hibernation
    OVD_OPEN_API
+   sdk_instructure
 
 Indices and tables
 ==================
