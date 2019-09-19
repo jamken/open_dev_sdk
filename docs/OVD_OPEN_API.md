@@ -818,7 +818,7 @@ APP打开相关录像文件后，设备推送相关内容
 	{
 	    OVDLogLevel logLevel;           //日志输出级别，详细见枚举值LogLevel，可选
 	    OVDLogSTD   logSTD;             //日志输出位置，可选，详细见枚举值LogSTD，可选
-	    void (*pOVDLogOutCallBack)(char *outBuff);  //device提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中，可选，空为不支持
+	    void (*pOVDLogOutCallBack)(const char* format,va_list );  //设备提供的日志输出回调，SDK的输出日志可以保存到device的存储文件中，可选，若未空为不支持
 	}OVDLogParam;
 	
 	typedef enum
