@@ -2,33 +2,7 @@
 ## 一、SDK目录及说明
 ###1、目录架构
 	SDK目录架构如下：
-	.
-	├── config
-	│   ├── rock3308.config  （rock3308 为设备型号标识）
-	│   └── x86_64.config
-	├── demo
-	│   ├── build
-	│   ├── Makefile
-	│   └── src
-	├── doc
-	│   └── 开放设备接入SDK- 概要设计.docx
-	├── environment.mk
-	├── include
-	│   ├── cjson
-	│   └── OVD_OpenAPI.h
-	├── lib
-	│   └── rock3308  （设备型号标识）
-	│		└── libcjson.a
-	│		└── libovd.a
-	│ 
-	├── Makefile
-	└── samples
-	    ├── build
-	    ├── configure
-	    ├── include
-	    ├── Makefile
-	    ├── resources
-	    └── src
+	![SDK目录架构](sdkcontent.png)
 
 ###2、目录说明
 ####2.1 config目录
