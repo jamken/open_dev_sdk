@@ -2,7 +2,7 @@
 ## 一、SDK目录及说明
 ### 1、目录架构
 	SDK目录架构如下：
-	![SDK目录架构](sdkcontent.png)
+![SDK目录架构](sdkcontent.png)
 
 ### 2、目录说明
 #### 2.1 config目录
