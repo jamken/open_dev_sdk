@@ -2,16 +2,8 @@
 ## 一、设备端开放SDK集成接口说明
 **本文档描述了开放SDK与本地视音频设备之间的交互接口， 通过本说明，本地视音频设备可以通过SDK提供的统一接入能力接入到开放云平台，提供相应的服务及设置。**
 
-   
-## 二、接口文档概述
-## 1 开放SDK在系统中的位置
-![SDK在系统中的位置](SDKsysarch.jpg)
 
-## 2 开放SDK流程简述
-![SDK流程图](SDKflowchart.jpg)
-
-
-## 三、接口详细描述
+## 二、接口详细描述
 ## 1 SDK初始化
 ### 接口描述
 设备上电后调用
@@ -124,10 +116,9 @@
 ### 接口描述
 音视频内容传送结束接口
 ### 接口定义
-**`int OVD_AVPushEnd(int channel,OVDContentType contentType)`**
+**`int OVD_AVPushEnd(int channel)`**
 ### 参数说明：
     [in]channel:         通道号
-    [in]contentType:     准备传送的内容，详见枚举值OVDContentType 音频、视频、音视频
 ### 返回值：
     成功：0
     失败：-1
