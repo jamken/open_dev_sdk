@@ -125,11 +125,6 @@
 	1. 拷贝头文件到工程目录下，并在代码中引入OVD_OpenApi.h头文件
 	2. 拷贝相应的libovd.a、libcjson.a（若设备无json库，则需要一起拷贝）到工程目录下
 
-    
-### 3 集成SDK编译流程
-	- 集成商首先在config目录下对XXX.config文件对TOOLCHAIN_BIN_PATH, CROSS_COMPILE, CROSS_SYSROOT, CUSTOM_CFLAGS进行修改，适配自己的编译环境
-	- 在主目录上执行TARGET_BUILD=XXX make all ,XXX 为设备型号标识
-
 
 ## 四、demo使用流程
 ### 1 运行参数配置
