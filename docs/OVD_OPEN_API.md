@@ -782,7 +782,7 @@ APP打开相关录像文件后，设备推送相关内容
 	    OVDDEVType devType;            //设备类型，详细可见枚举类型OVDDevType，必填
 	    char OVDDeviceID[MAX_LEN_32];           //OVD设备ID，必填
 	    char OVDPassword[MAX_LEN_64];           //OVD接入密码，必填
-	    char OVDHardWareModel[MAX_LEN_64];      //OVD的硬件型号，必填
+	    char OVDHardWareModel[MAX_LEN_32];      //OVD的硬件型号，必填
 	    char OVDSystemVersion[MAX_LEN_32];      //OVD的固件版本号，必填
 	    //int  period;                    //device记录的SDK周期上报的周期，单位：秒，必填
 	    OVDNetParam netParam;           //网络信息，必填
@@ -858,7 +858,7 @@ APP打开相关录像文件后，设备推送相关内容
 	    int  SDExist;		    //0 not, 1 yes, 2 error
 	    int	 SDTotalSize;	    //总容量(M)
 	    int	 SDFreeSize;	    //空闲量
-	    char EarlyFileName[MAX_LEN_64]; //当前SD卡最早一个录像文件
+	    char EarlyFileName[MAX_LEN_24]; //当前SD卡最早一个录像文件
 	}OVDSDInfo;
 	
 	typedef enum
