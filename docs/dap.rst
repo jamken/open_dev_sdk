@@ -32,11 +32,12 @@ OVS RPC底层基于TCP/IP的WebSocket，应用层为基于JSON的自定义协议
 
 websocket URL::
 
-  ws://<OVC domain:port>/ovc?login_code=<OVD设备ID>&login_passwd=<OVD接入密码>&hardware_model=<OVD的硬件型号>&firmware_model=<OVD的固件版本号>
+  ws://<OVC domain:port>/ovc?login_code=<OVD设备ID>&login_passwd=<OVD接入密码>&hardware_model=<OVD的硬件型号>&firmware_model=<OVD的固件版本号>&sdk=<SDK版本号>
 
 OVD通过上述URL主动连接并登录OVC平台，其中“OVD设备ID”以及“VD接入密码”是平台指定的，因此IVT需要提供方法配置这两个参数，以便在连接OVC时使用；
 如果URL中给定的设备ID与接入密码与平台配置不符，登录会失败。
 “OVD的硬件型号”与“OVD的固件版本号”由OVD厂家自定义，主要用于后期问题追踪，以及用于支持平台远程固件升级。
+“SDK版本号”是当前使用的ovdsdk的版本号，由SDK内部填写，没有使用ovdsdk可以不提供此参数。
 另外，WebSocket的子协议为空，无需指定。
 
 应用层协议的基本通信类型包括RPC与event（事件通知）两种：
