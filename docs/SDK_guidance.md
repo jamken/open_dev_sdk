@@ -18,13 +18,14 @@
   如果IVT为NVR/DVR，则会有多条通道，每条通道代表一个NVR管理下的摄像头。
 
 
+
 ## 一、 SDK在系统中的位置
 ![SDK在系统中的位置](SDKsysarch.jpg)
 
 ## 二、SDK目录及说明
 ### 1、目录架构
 	SDK目录架构如下：
-![SDK目录架构](sdkcontent.png)
+![SDK目录结构](sdkcontent.png)
 
 ### 2、目录说明
 #### 2.1 config目录
