@@ -100,14 +100,14 @@
 	src:   放置demo 源码文件, 演示和配置文件
 	Makefile: demo 模块的 Makefile
 	build: 放置demo模块编译生成文件
-    configure： 放置设备参数信息。其中DeviceConf.ini为设备参数配置文件，包括了各resource文件的路径配置项，比如模拟的音视频源、告警图片、声波/二维码配网的源信息等。在使用demo时，若有resource文件需要替换，需要替换DeviceConf.ini文件配置项。 
+    configure： 放置设备参数信息。其中DeviceConf.ini为设备参数配置文件，和各resource文件的路径配置项，比如模拟的音视频源、告警图片、声波/二维码配网的源信息等。在使用demo时，若有resource文件需要替换，需要替换DeviceConf.ini文件配置项。 
     例如示例中DeviceConf.ini配置资源文件的路径为：
-			- resource/video.h264 为模拟摄像头的视频源文件，必须为H264编码。
-			- resource/audio.aac  为模拟麦克的音频源文件，必须为AAC格式。
-			- resource/alarmPic.bmp 为模拟告警时上传的告警图片
-			- resource/snapshotPic.bmp 为OVC下发截图命令时，设备的截图源文件
-			- resource/voiceRecognize.pcm 为声波识别时模拟的麦克采集的声波源文件
-			- resource/qr.bmp   为二维码识别时模拟的摄像头采集的二维码源文件
+			- video.h264 为模拟摄像头的视频源文件，必须为H264编码。
+			- audio.aac  为模拟麦克的音频源文件，必须为AAC格式。
+			- alarmPic.bmp 为模拟告警时上传的告警图片
+			- snapshotPic.bmp 为OVC下发截图命令时，设备的截图源文件
+			- voiceRecognize.pcm 为声波识别时模拟的麦克采集的声波源文件
+			- qr.bmp   为二维码识别时模拟的摄像头采集的二维码源文件
              
 	
 #### 2.7 samples目录
@@ -162,13 +162,13 @@
 
 ### 2 运行参数配置
 
-	1、若需要修改模拟的推送音视频源、模拟的告警图片、声波识别/二维码识别源等，则在configure/DeviceConf.ini 中修改所需资源文件的路径及文件名信息。
-	2、在configure/deviceInfo.ini文件中，根据情况修改设备参数信息。
+	1、若需要修改模拟的推送音视频源、模拟的告警图片、声波识别/二维码识别源等，则在DeviceConf.ini中修改所需资源文件的路径及文件名信息。
+	2、在DeviceConf.ini文件中，根据情况修改设备参数信息。
 
 ### 3 demo执行
 
-	1、在demo/build/XXX/bin目录下执行 "./build/XXX/bin/demo ./configure/"，然后按照提示进行输入，引导程序继续执行
-	2、 首先会询问设备本身参数是否在configure目录下的配置文件是否准备好，若需要修改参数，请先修改完毕
+	1、 在demo/build/XXX/bin目录下执行 "./demo ${PATH}/DeviceConf.ini"，然后按照提示进行输入，引导程序继续执行
+	2、 首先会询问设备本身参数是否在配置文件DeviceConf.ini准备好，若需要修改参数，请先修改完毕
 	3、 准备好设备参数后，输入y，设备进行启动，初始化SDK
 	4、 看到如下引导命令，即SDK启动成功
 	5、 根据如下命令引导demo执行，
