@@ -1009,6 +1009,13 @@ APP打开相关录像文件后，设备推送相关内容
 	    MP3_OTHER,
 	}OVDMp3PlayCtrl;
 	
+	typedef enum
+	{
+		OVD_PLAY_STOPPED		=	0,  //停止播放状态
+		OVD_PLAY_PAUSING		=	1,  //暂停状态
+		OVD_PLAY_PLAYING		=	2,  //播放中
+	}OVDAudioPlayStatus;
+	
 	typedef struct
 	{
 	    char *buf;    			//数据buf
@@ -1035,68 +1042,6 @@ APP打开相关录像文件后，设备推送相关内容
 	    char*           desc;               //告警描述
 	    OVDImageInfo	ImageInfo;	   //背景图信息
 	}OVDUpLoadAlarmInfo;
-	
-	typedef enum {
-	    OVD_LOCK_OPEN		=	0,	   //开锁事件
-	    OVD_LOCK_PICKALARM	=	1,	   //撬锁事件
-	    OVD_LOCK_ADDUSER	=	2,	   //添加用户事件
-	    OVD_LOCK_DELUSER	=	3,  //删除用户事件
-	    OVD_LOCK_DOORBELL	= 	4,	   //门铃事件
-	    OVD_LOCK_SYSTEMLOCK	=	5,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
-	    OVD_LOCK_LOWBAT		=	6,	   //低电报警
-	    OVD_LOCK_RESET		=	7,	   //恢复出厂设置报警
-	}OVDLockMsgType;
-	
-	typedef struct
-	{
-	    int 	m_year;			    //年,2009
-	    int		m_month;		    //月,1-12
-	    int		m_day;			    //日,1-31
-	    int		m_hour;			    //0-24
-	    int		m_minute;		    //0-59
-	    int		m_second;		    //0-59
-	    int		m_microsecond;	    //毫秒	0-1000
-	}OVDDateTime;
-	
-	typedef enum
-	{
-	    LOCK_KEY		=	0x00,  //钥匙开锁
-	    LOCK_PSW		=	0x01,  //密码开锁
-	    LOCK_FINGER		=	0x02,  //指纹开锁
-	    LOCK_CARD		=	0x03,  //门卡开锁
-	    LOCK_REMOTE		=	0x04,  //遥控开锁
-	    LOCK_PICK		=	0x05,  //撬锁
-	    LOCK_TEMPPSW	=	0x06,  //临时密码开锁
-	    LOCK_OTHER,
-	}OVDUnlockType;
-	
-	typedef struct
-	{
-	    char			Name[MAX_LEN_128]; 		   //开锁用户名称
-	    OVDDateTime		UnlockTime;		   //开锁时间
-	    OVDUnlockType	UnlockType;		   //开锁类型
-	    int     		UserNumber;		   //开锁用户编号
-	}OVDLockOpenInfo;
-	
-	typedef struct
-	{
-	    OVDUnlockType	 UnlockType;		//对应用户录入的开锁类型
-	    int     		 UserNumber;		//对应用户录入的用户编号
-	}OVDLockUserInfo;
-	
-	
-	typedef struct{
-	    OVDLockMsgType	msgType;			//消息类型
-	
-	    //msgType 为 OVD_LOCK_OPEN 才起作用
-	    OVDLockOpenInfo	openInfo;			//开锁信息
-	
-	    //msgType 为 OVD_LOCK_ADDUSER 或者 OVD_LOCK_DELUSER 才起作用
-	    OVDLockUserInfo	userInfo;			//添加/删除用户的详细信息
-	
-	    //msgType 为 OVD_LOCK_LOWBAT 才起作用
-	    int  			Electric;			//低电报警时附带的电量 1~100
-	}OVDLockMsgInfo;
 	
 	
 	typedef enum
