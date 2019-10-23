@@ -8,11 +8,16 @@
 ### 接口描述
 设备上电后调用
 ### 接口定义
-**`int OVD_Init(OVDClientParam *clientParam, OVDLogParam *logParam, OVD_CallBackFunList *callBackFunList)`**
+**`extern int OVD_Init(OVDClientParam *clientParam, OVDLogParam *logParam, OVD_CallBackFunList *callBackFunList, char *jsonParam)`**
 ### 参数说明：
     [in]clientParam:       云服务器地址及端口号，见OVDClientParam结构体
 	[in]logParam:          输出日志配置信息，见OVDLogParam结构体
     [in]callBackFunList:   提供给服务器端调用的回调函数，以相应服务器端的请求，见OVD_CallBackFunList。   注：若未提供相关的回调函数，则相关请求被丢弃，及设备端不提供对应的功能。
+    [in]jsonParam:         json格式化后的字符串，提供动态的参数配置。目前提供 1) snapshotSize: int型数值，设备截图的默认大小；2) buffDuration: int型数值，设备缓存的默认时长，单位为秒。 json格式信息参考如下：
+         {
+             "snapshotSize":<可选，整数： 设备默认清晰度下的截图大小。若不设置，则SDK中默认设置为500k>
+             "buffDuration":<可选，整数： 设备从上电到连接到平台时，需要SDK缓存的音视频内容的时长，单位为秒。若不设置，则SDK中默认设置为10s>
+         }
 ### 返回值：
     成功：0
     失败：-1
@@ -278,288 +283,347 @@ APP打开相关录像文件后，设备推送相关内容
 
 
 
-## 9 门锁端特殊接口
-### 9.1 上报门锁操作消息(开锁/增删用户/系统锁定/系统恢复出厂设置等等)
-### 接口定义
-**`int OVD_LockUploadMsgInfo(OVDLockMsgInfo *lockinfo)`**
-### 参数说明：
-    [in]lockinfo:        锁端消息信息,详细可见结构体描述OVDLockMsgInfo
-### 返回值：
-    成功：0
-    失败：-1
-
-
 
 ## 11 回调OVD_CallBackFunList定义及说明
 ### 回调结构体定义
     typedef struct{
-        //获取设备信息，开放平台获取设备的固有信息
-		/*
-        **参数说明:
-        **    [out]deviceInfo:    需要设备返回的信息，详细见结构体OVDDeviceInfo
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC获取OVD设备信息时调用
+	     * 功能介绍：根据结构体OVDDeviceInfo的定义，返回相应的设备参数信息，包括设备ID、软硬件版本信息、wifi信息、ip\mac等信息
+	     *
+	    **参数说明:
+	    **    [out]deviceInfo:    需要设备返回的信息，详细见结构体OVDDeviceInfo
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_GetOVDDeviceInfo)(OVDDeviceInfo *deviceInfo);        
 
 
-        //设备端信息获取接口，开放平台获取设备的配置信息
-		/*
-        **参数说明:
-        **    [out]output_ovdconfig:    需要返回的信息，是json格式后，经过序列化后的流
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC获取OVD的能力信息时调用
+	     * 功能介绍：根据“设备配置信息定义”说明，返回相应的设备参数信息，包括时区、音视频能力、告警能力等信息。没有的参数可以不携带
+	     *
+	    **参数说明:
+	    **    [out]output_ovdconfig:    需要返回的信息，json格式信息，见具体反馈信息如上“设备配置信息定义”说明
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_GetOVDConfigureInfo)(char* output_ovdconfig);
 
 
-        //配置设备端信息接口，开放平台设置设备的配置信息
-		/*
-        **参数说明:
-        **    [in]in_ovdconfig:    需要设置的信息，是json格式后，经过序列化后的流
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC对相应的参数进行修改时，通过此接口下发需要修改的参数
+	     * 功能介绍：OVD根据收到的参数信息，启用相应配置的参数。没有携带的信息，设备保持原参数配置
+	     *
+	     *
+	    **参数说明:
+	    **    [in]in_ovdconfig:    需要设置的信息，json格式信息，见具体反馈信息如上“设备配置信息定义”说明
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVC_SetOVDConfigureInfo)(char* in_ovdconfig);
 
 	    
-	    //设置对应服务器信息,去配置P2P、turn、心跳等服务器的地址
-	    /*参数说明：
-	    **   [out]netParam:       云服务平台反馈的服务信息，其中地址为空的为未返回数据，此时设备继续使用原配置
-        **
+	    /*
+	    * 调用时机：OVC相应的地址发生变动时，通过此接口通知OVD
+	    * 功能介绍：OVD根据配置信息，断开原来的连接，根据新的服务器地址建立新的连接；其中地址为空的为未返回数据，OVD继续使用原配置
+	    *
+	    **参数说明：
+	    *     [out]netParam:     OVC反馈的服务信息，详细见结构体OVDNetParam定义，其中地址为空的为未返回数据，此时设备继续使用原配置
+	    **返回值：
+	    *    成功：0
+	    *    失败：-1
+	     */
+	    int (*OVD_SetServerInfo)(OVDNetParam *netParam);
+
+
+	    /*
+	     * 调用时机：当SDK与OVC之间的连接状态发生变化时（连接上/连接断开），通过此接口通知OVD
+	     * 功能介绍：OVD根据状态的通知，决定相应处理
+	     *
+	    **参数说明:
+	    **    [in]connectStatus:    //0:连接成功     -1:连接失败
+	    **
+	    **返回值：
+	    **    无
+	    */
+	    void (*OVD_OVCConnectStatus)(int connectStatus);
+
+
+	    /*
+	     * 调用时机：当用户通过APP远程控制channel重启时，调用此接口
+	     * 功能介绍：OVD根据入参，重新启动相应的channel；若OVD不支持单channel重启，那么就重启设备
+	     *
+	    **参数说明:
+	    **    [in]channel:    若重启channel，则为需要重启的channel。 注：如设备不支持单独重启channel，则直接重启设备。
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
+        int (*OVD_ReBootChannel)(int channel);
+
+
+	    /*
+	     * 调用时机：当用户通过APP远程控制设备重启时，调用此接口
+	     * 功能介绍：OVD重启设备
+	     *
+	    **参数说明:
+	    **    无
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
+        int (*OVD_ReBootDevice)();
+
+
+	   /*
+	     * 调用时机：OVC可以通过该方法阻止设备（及指定通道）在指定时间内休眠，或者唤醒设备（及指定通道）当前所有休眠的部件
+	     * 功能介绍：OVD收到此指令后，应该在指定的过期时间内，保证设备（及指定通道）能够完全正常上电工作。收到此命令expired秒后，由设备自行决定是否进入休眠状态
+	     *
+	    ** 参数说明：
+	    **    [in]channel:    需要保持不休眠的channel
+	    **    [in]expired:    从收到命令起，到expired的时间内，保持不休眠
 	    ** 返回值：
 	    **    成功：0
 	    **    失败：-1
 	    */
-	    int (*OVD_SetServerInfo)(OVDNetParam *netParam);
+	    int (*OVD_KeepAwakenUtilExpired)(int channel, int expired);
 
 
-        //重启channel，通过此接口去重启特定的channel。注：如设备不支持单独重启channel，则直接重启设备。
-        /*
-        **参数说明:
-        **    [in]channel:           若重启channel，则为需要重启的channel。 注：如设备不支持单独重启channel，则直接重启设备。
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_ReBootChannel)(int channel);
-
-
-        //重启设备，通过此接口去重启设备。
-        /*
-        **参数说明:
-        **    无
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_ReBootDevice)();
-
-
-        //按页查询录像文件
-        /*
-        **参数说明:
-        **    [in]channelmask1:   需要查询的通道mask，对应低位号的通道
-        **    [in]channelmask2:   需要查询的通道mask，对应高位号的通道
-        **    [in]recordTypemask:     文件类型（第0位：视频文件 第1位：告警文件）
-        **    [in]startStamp:     录像查询的起始时间戳(s)
-        **    [in]endStamp:       录像查询的结束时间戳(s)
-        **    [in]page:           查询的页码
-        **    [in]numInPage:      每页的条数
-        **    [in]fileInPage:     录像文件列表信息，详细可见结构体描述OVDRecordFileListPerPage
-        **
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        **
-        **其他说明:
-        **    假设查询的录像文件数有200个，numInPage=10，则最大页码Page为20。若传进的参数numInPage=10，page=2，则fileInPage应该返回第10个到第20个录像的信息;若传进的参数numInPage=10，page=21，则fileInPage返回空录像信息(录像个数为0)                     
-        */
+	    /*
+	     * 调用时机：OVC查看OVD上SD卡的录像文件信息列表时，调用此接口
+	     * 功能介绍：OVD根据入参的配置，查询SD卡中的文件列表，并返回文件列表信息
+	     *
+	    **参数说明:
+	    **    [in]channelmask1:   需要查询的通道mask，对应低位号的通道
+	    **    [in]channelmask2:   需要查询的通道mask，对应高位号的通道
+	    **    [in]recordTypemask:     文件类型（第0位：视频文件 第1位：告警文件）
+	    **    [in]startStamp:     录像查询的起始时间戳(s)
+	    **    [in]endStamp:       录像查询的结束时间戳(s)
+	    **    [in]page:           查询的页码
+	    **    [in]numInPage:      每页的条数
+	    **    [out]fileInPage:    录像文件列表信息，详细可见结构体描述OVDRecordFileListPerPage
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    **
+	    **其他说明:
+	    **    假设查询的录像文件数有200个，numInPage=10，则最大页码Page为20。若传进的参数numInPage=10，page=2，则fileInPage应该返回第10个到第20个录像的信息;若传进的参数numInPage=10，page=21，则fileInPage返回空录像信息(录像个数为0)
+	    */
         int (*OVD_QueryRecordPage)(unsigned int channelmask1,unsigned int channelmask2,int recordType, unsigned long StartStamp,unsigned long EndStamp,int Page,int numInPage,OVDRecordFileListPerPage *FilePage);
 
 
-        //打开录像文件
-        /*
-        **参数说明:
-        **    [in]channel:          通道号
-        **    [in]recordname:       录像文件名称
-        **    [out]videoInfo:       视频信息,详细可见结构体描述OVDVideoDataFormat
-        **    [out]audioInfo:       音频信息,详细可见结构体描述OVDAudioDataFormat
-        **    [out]fileTotalTime:   该录像的时长(ms)
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC根据查询到的SD卡文件列表信息，决定查看一个文件详细信息，调用此接口
+	     * 功能介绍：OVD根据入参的文件名称，读取SD卡上相应文件的音视频数据参数信息及录像时长，反馈到出参
+	     *
+	    **参数说明:
+	    **    [in]channel:          通道号
+	    **    [in]recordname:       录像文件名称
+	    **    [out]videoInfo:       视频信息,详细可见结构体描述OVDVideoDataFormat
+	    **    [out]audioInfo:       音频信息,详细可见结构体描述OVDAudioDataFormat
+	    **    [out]fileTotalTime:   该录像的时长(ms)
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_OpenRecordFile)(int channel,char* recordname,OVDVideoDataFormat* videoInfo,OVDAudioDataFormat* audioInfo,int* fileTotalTime);
 
 
-        //录像文件控制
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [in]controlType:     播放控制，详细可见枚举类型OVDCONTROLTYPE
-        **    [in]value:           额外值，目前只有视频拖动时会用到，代表要跳至的视频时间戳(ms)
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC根据查询到的SD卡文件列表信息，控制相应音视频文件的播放、停止、暂停等信息
+	     * 功能介绍：OVD根据控制信息，控制文件的内容是否通过OVD_SendRecordAVContent上传文件内容
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **    [in]controlType:     播放控制，详细可见枚举类型OVDCONTROLTYPE
+	    **    [in]value:           额外值，目前只有视频拖动时会用到，代表要跳至的视频时间戳(ms)
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_RecordCotrol)(int channel,OVDCONTROLTYPE controlType,int value);
 
 
-        //设备升级接口，开放平台上传新的升级包，制定升级策略后，调用此接口通知设备进行版本升级。由设备根据提供的URL去下载升级包升级
-        /*
-        **参数说明:
-        **    [in]firmware_model:  要升级的固件的版本号
-        **    [in]upgradeURL:      升级固件的远程url，由设备主动去下载、升级
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC根据配置及OVD当前的版本，触发OVD进行固件升级时调用
+	     * 功能介绍：OVD对比要升级的固件版本号和当前自身的固件版本号，若版本号不一致，那么到相应的URL去下载升级固件
+	     *
+	    **参数说明:
+	    **    [in]firmware_model:  要升级的固件的版本号
+	    **    [in]upgradeURL:      升级固件的远程url，由设备主动去下载、升级
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_FirmwareUpgrade)(char *firmware_model, char *upgradeURL);
 
 
-        //设备升级状态查询，开放平台上在下发固件升级后，会不定期的查询升级状态及进度。设备通过此接口返回当前的升级状态及进度
-        /*
-        **参数说明:
-        **    [out]upgradeStatus:    升级状态，详细见枚举值OVDUpgradeStatus
-        **    [out]upgradeProgress:  升级进度，整数值 0-100
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC下发升级版本的命令后，会周期性的查询OVD的升级状态及进度
+	     * 功能介绍：OVD根据当天升级状态及进度，反馈相应的值
+	     *
+	    **参数说明:
+	    **    [out]upgradeStatus:    升级状态，详细见枚举值OVDUpgradeStatus
+	    **    [out]upgradeProgress:  升级进度，整数值 0-100
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_QueryFirmwareUpgradeStatus)(OVDUpgradeStatus *upgradeStatus, int *upgradeProgress);
 
 
-        //设备时间同步，由开放平台发起时间同步；由于网络延迟，若设备上的原有时间与服务器同步的时间的偏差在offset秒之内，则设备无需同步时间
-        /*
-        **参数说明:
-        **    [in]time:             要同步的时间
-        **    [in]offset:           为整数，单位秒。由于网络延迟，设置此为可接受的偏差，若设备原时间与上面给定的时间的偏差在offset秒之内，则设备无需同步时间
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC需要与设备同步时间时调用
+	     * 功能介绍：OVD根据传入的时间及偏差，决定是否根据下发的参数修改时间
+	     *
+	    **参数说明:
+	    **    [in]time:             要同步的时间
+	    **    [in]offset:           为整数，单位秒。由于网络延迟，设置此为可接受的偏差，若设备原时间与上面给定的时间的偏差在offset秒之内，则设备无需同步时间
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_SyncTime)(time_t time, int offset);        
 
 
-        //设备时间查询，查询设备上当前的时间
-        /*
-        **参数说明:
-        **    [out]time:             设备上的时间，为字符串
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC需要获取设备时间时调用
+	     * 功能介绍：OVD查询本地时间，反馈参数
+	     *
+	    **参数说明:
+	    **    [out]time:             设备上的时间
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_QueryTime)(time_t *time);  
 
 
-        //获取SD卡信息
-        /*
-        **参数说明:
-        **    [out]sdInfo:   存储卡信息,详细可见结构体描述OVDSDInfo
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	     /*
+	     * 调用时机：OVC需要获取SD卡信息时调用
+	     * 功能介绍：OVD查询本地SD卡相关信息（OVDSDInfo定义的内容），反馈信息
+	     *
+	    **参数说明:
+	    **    [out]sdInfo:   存储卡信息,详细可见结构体描述OVDSDInfo
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_GetSDInfo)(OVDSDInfo *sdInfo);
 
 
-        //格式化SD卡
-        /*
-        **参数说明:
-        **    无
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC需要格式化SD卡时调用
+	     * 功能介绍：OVD格式化SD卡
+	     *
+	    **参数说明:
+	    **    无
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_SetSDCardFormat)();       
 
 
-        //云台控制设备，控制设备转动，携带转动速度。注：若设备不支持，则可忽略speed值
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [in]ptzcmd:          控制命令,详细可见枚举类型OVCPTZControlCmd
-        **    [in]speed:           表示转动速度，整数，0-100，0最慢，100最快，默认100。 注：若设备不支持，则可忽略此参数值
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：APP端控制OVD进行转动时，调用此接口
+	     * 功能介绍：OVD根据控制命令，执行动作
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **    [in]ptzcmd:          控制命令,详细可见枚举类型OVCPTZControlCmd
+	    **    [in]speed:           表示转动速度，整数，0-100，0最慢，100最快，默认100。 注：若设备不支持，则可忽略此参数值
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_PTZCmd)(int channel,OVCPTZControlCmd ptzcmd,int speed);
 
 
 
-        //获取设备预置点列表信息
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [out]presetList:     返回的预置点列表
-        **    [out]count:          预置点个数
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC获取OVD预置点列表信息
+	     * 功能介绍：OVD返回前期配置的预置点信息
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **    [out]presetList:     返回的预置点列表
+	    **    [out]count:          预置点个数
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_GetPresetList)(int channel,int *presetList, int *count);
 
-
-        //打开对讲接口，准备与APP对讲
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	
+	    /*
+	     * 调用时机：APP端发起对讲时，调用此接口打开OVD对讲
+	     * 功能介绍：OVD打开OVD对讲功能
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_AudioPlayStart)(int channel);
 
 
-        //播放对讲音频，SDK收到APP端的音频数据后，通知设备端播放
-        /*
-        **参数说明:
-        **    [in]channel:  通道号
-        **    [in]buf:      音频数据指针
-        **    [in]size:     音频数据大小
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：OVC把对讲的音频内容，传输给OVD时调用
+	     * 功能介绍：OVD接收数据，并在音箱播放出来
+	     *
+	    **参数说明:
+	    **    [in]channel:   通道号
+	    **    [in]buf:      音频数据指针
+	    **    [in]size:     音频数据大小
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_AudioPlayProGress)(int channel,unsigned char* buf, int size);
 
 
-        //关闭对讲接口，APP端对讲结束，或者一段时间内SDK未收到APP端的数据，则调用此接口
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：APP关闭对讲时通知OVD
+	     * 功能介绍：OVD关闭对讲功能
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_AudioPlayStop)(int channel);
 
 
-	    //设备与APP进行通话时，APP操作界面调整视频清晰度时，调用此接口；设备返回配置清晰度下的视频参数
 	    /*
+	     * 调用时机：OVC通知OVD切换视频清晰度时调用
+	     * 功能介绍：OVD根据配置切换到相应的视频清晰度，并返回切换后的视频参数
+	     *
 	    **参数说明:
 	    **    [in]channel:         通道号
 	    **    [in]quality:         要设置的清晰度，详细参考枚举值OVDEncodeQuality
@@ -571,98 +635,152 @@ APP打开相关录像文件后，设备推送相关内容
 	    */
 	    int (*OVD_VedioSwitchQuality)(int channel, OVDEncodeQuality quality, OVDVideoDataFormat *vedioInfo);
 
-
-        //强制出I帧，通知视频强制出一个I帧
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
+	    /*
+	     * 调用时机：SDK在收到上传视频、P2P播放等命令时，为了服务器/客户端能够最短时间内播放视频，调用此接口强制OVD出一个I帧
+	     * 功能介绍：OVD收到后，在此channel上的数据流上强制出一个I帧，并继续上传数据流
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
         int (*OVD_ForceIFrame)(int channel);
 
 
-        //截图，截取当前的视频画面
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [out]ImageInfo;	   截取的图片信息
-        **    
-        **返回值：
-        **    成功：0
-        **    截图失败：-1
-        **    空间不足：-2,  maxImageSize空间不足，并在OVDImageInfo.size中带回所需要图片大小
-        */
+	    /*
+	     * 调用时机：OVC通知OVD截取channel上的当前图片
+	     * 功能介绍：OVD截取channel上的当前图片，反馈截图内容及信息。若截图大小大于maxImageSize，则返回-2并在OVDImageInfo.size中带回所需要图片大小
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **    [out]ImageInfo;	   截取的图片信息
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    截图失败：-1
+	    **    空间不足：-2,  maxImageSize空间不足，并在OVDImageInfo.size中带回所需要图片大小
+	    */
         int (*OVD_Snapshot)(int channel,OVDImageInfo *imageInfo, int maxImageSize);
 
 
-        //音乐播放，服务器端给定播放的url，由设备去下载歌曲并播放
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [in]url:          歌曲下载的url
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_SetMp3Url)(int channel,char *url);
+	    /*
+	     * 调用时机：OVC通知OVD播放音乐时调用
+	     * 功能介绍：OVD去url下载音乐内容，并在channel的音箱上播放
+	     *
+	    **参数说明:
+	    **    [in]channel:      通道号
+	    **    [in]url:          歌曲下载的url
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
+	    int (*OVD_SetAudioOutPlay)(int channel,char *url);
 
 
-        //音乐播放控制，服务器端控制音乐播放 停止、暂停、继续。
-        /*
-        **参数说明:
-        **    [in]channel:      通道号
-        **    [in]ctrl:         播放控制,详细可见枚举类型OVDMp3PlayCtrl
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_Mp3PlayCtrl)(int channel,OVDMp3PlayCtrl ctrl);
+	    /*
+	     * 调用时机：OVC控制OVD的音乐播放
+	     * 功能介绍：OVD根据控制信息，控制音乐的播放 停止、暂停、继续
+	     *
+	    **参数说明:
+	    **    [in]channel:      通道号
+	    **    [in]ctrl:         播放控制,详细可见枚举类型OVDMp3PlayCtrl
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
+	    int (*OVD_AudioOutPlayCtrl)(int channel,OVDMp3PlayCtrl ctrl);
 
 
-        //获取音乐播放状态，当前正在播放的音乐文件的URL，该域不存在或者空串表示当前未播放
-        /*
-        **参数说明:
-        **    [in]channel:         通道号
-        **    [out]url:            正在播放的歌曲的下载url，该域不存在或者空串表示当前未播放，url最长1024字节
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_GetMp3PlayStatus)(int channel,char *url);
-
-
-        //设置门锁端的时间
-        /*
-        **参数说明:
-        **    [in]timeInfo:         设置时间,详细可见结构体描述OVDDateTime
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_SetLockTime)(void *userData,OVDDateTime *timeInfo);
-
-
-        //获取门锁端的时间
-        /*
-        **参数说明:
-        **    [out]timeInfo:         获取锁端时间,详细可见结构体描述OVDDateTime
-        **    
-        **返回值：
-        **    成功：0
-        **    失败：-1
-        */
-        int (*OVD_GetLockTime)(void *userData,OVDDateTime *timeInfo);
+	    /*
+	     * 调用时机：OVC查询OVD上当前的音乐播放情况
+	     * 功能介绍：OVD根据当前的播放情况，反馈播放音乐的URL及播放状态（播放 停止、暂停、继续）；若未播放任何音乐，则URL为空
+	     *
+	    **参数说明:
+	    **    [in]channel:         通道号
+	    **    [out]status:         播放状态,见OVDAudioPlayStatus枚举值定义
+	    **    [out]url:            正在播放的歌曲的下载url，该域不存在或者空串表示当前未播放，url最长1024字节
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+	    */
+	    int (*OVD_GetAudioOutPlayStatus)(int channel, int* status, char* out_url);
 
     }OVD_CallBackFunList;
 
 ## 10 附加定义及说明
+	/*
+	 *设备配置信息定义
+	 *json格式
+	 *
+	 {
+	  "channls": [
+	    {
+	      "channel":   <必填，可读可写，整数：通道号>
+	      "video_encoding":{
+	        "encoder": <必填，可读可写，字符串：视频编码器名称，目前仅支持h264>
+	        "quality": <必填，可读可写，字符串；可选值为：ld、sd、hd、fhd，分别代表低清，标清，高清，全高清>
+	        "fps": <可选，只读，整形：每秒帧数>
+	        "bitrate": <可选，只读，整形：码流比特率>
+	        "width": <可选，只读，整形：图像宽度像素>
+	        "height": <可选，只读，整形：图像高度像素>
+	        "gop": <可选，只读，整形：码流gop,单位帧>
+	        "rsk_encrypt": <可选，客端可写，布尔型：是否对视频码流进行rsk加密，默认为false>
+	      }
+	      "audio_encoding":{
+	        "encoder": <必填，可读可写，字符串：音频编码器名称，目前仅支持aac>
+	        "sample_rate": <可选，只读，整形：采样率，即每秒钟采用数目，合法值8000/16000/32000/44100/48000>
+	        "bitrate": <可选，只读，整形：码流比特率>
+	        "bits_per_sample": <可选，只读，整形：位宽，即每个sample的比特数>
+	        "sample_per_frame": <可选，只读，整形：每一帧中包含的sample数，AAC算法标准固定为1024>
+	        "channel": <可选，只读，整形：声道数>
+	      }
+	      "image":{
+	        "horflip":  <必填，可读可写, 布尔型：水平翻转>
+	        "verflip":  <必填，可读可写, 布尔型：垂直翻转>
+	      }
+	
+	      "alarms":{
+	        "io":{           //外部报警配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	        "face":{          //人脸识别配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	        "cry":{           //哭声侦测配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	        "voice":{         //声音侦测配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	        "motion":{        //移动侦测配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	        "cross":{         //拌网配置，若OVD不具备该能力，该字段不存在
+	          "on":  <必填，可读可写,布尔型：使能开关>
+	          "sensitivity":  <必填，可读可写,整型：探测灵敏度， 0 - 100>
+	        }
+	      }
+	      "audio_out_volume": <可选，可读可写，整数：扬声器输出音量，0-100，若该字段不存在表示设备不支持音量调节>
+	      "trace":  <可选，可读可写,布尔型：移动跟踪, 若该字段不存在，则表示设备不支持移动追踪>
+	    }
+	    ...
+	  ],
+	  "tz": <必填，可读可写，整数：时区号，例如东八区为8>
+	 }
+	 *
+	 */
+
+
     typedef enum
 	{
 	    OVD_Video   =	0,          //视频
@@ -891,6 +1009,13 @@ APP打开相关录像文件后，设备推送相关内容
 	    MP3_OTHER,
 	}OVDMp3PlayCtrl;
 	
+	typedef enum
+	{
+		OVD_PLAY_STOPPED		=	0,  //停止播放状态
+		OVD_PLAY_PAUSING		=	1,  //暂停状态
+		OVD_PLAY_PLAYING		=	2,  //播放中
+	}OVDAudioPlayStatus;
+	
 	typedef struct
 	{
 	    char *buf;    			//数据buf
@@ -917,68 +1042,6 @@ APP打开相关录像文件后，设备推送相关内容
 	    char*           desc;               //告警描述
 	    OVDImageInfo	ImageInfo;	   //背景图信息
 	}OVDUpLoadAlarmInfo;
-	
-	typedef enum {
-	    OVD_LOCK_OPEN		=	0,	   //开锁事件
-	    OVD_LOCK_PICKALARM	=	1,	   //撬锁事件
-	    OVD_LOCK_ADDUSER	=	2,	   //添加用户事件
-	    OVD_LOCK_DELUSER	=	3,  //删除用户事件
-	    OVD_LOCK_DOORBELL	= 	4,	   //门铃事件
-	    OVD_LOCK_SYSTEMLOCK	=	5,	   //系统锁定事件(例如:连续输错5次密码会自动锁定)
-	    OVD_LOCK_LOWBAT		=	6,	   //低电报警
-	    OVD_LOCK_RESET		=	7,	   //恢复出厂设置报警
-	}OVDLockMsgType;
-	
-	typedef struct
-	{
-	    int 	m_year;			    //年,2009
-	    int		m_month;		    //月,1-12
-	    int		m_day;			    //日,1-31
-	    int		m_hour;			    //0-24
-	    int		m_minute;		    //0-59
-	    int		m_second;		    //0-59
-	    int		m_microsecond;	    //毫秒	0-1000
-	}OVDDateTime;
-	
-	typedef enum
-	{
-	    LOCK_KEY		=	0x00,  //钥匙开锁
-	    LOCK_PSW		=	0x01,  //密码开锁
-	    LOCK_FINGER		=	0x02,  //指纹开锁
-	    LOCK_CARD		=	0x03,  //门卡开锁
-	    LOCK_REMOTE		=	0x04,  //遥控开锁
-	    LOCK_PICK		=	0x05,  //撬锁
-	    LOCK_TEMPPSW	=	0x06,  //临时密码开锁
-	    LOCK_OTHER,
-	}OVDUnlockType;
-	
-	typedef struct
-	{
-	    char			Name[MAX_LEN_128]; 		   //开锁用户名称
-	    OVDDateTime		UnlockTime;		   //开锁时间
-	    OVDUnlockType	UnlockType;		   //开锁类型
-	    int     		UserNumber;		   //开锁用户编号
-	}OVDLockOpenInfo;
-	
-	typedef struct
-	{
-	    OVDUnlockType	 UnlockType;		//对应用户录入的开锁类型
-	    int     		 UserNumber;		//对应用户录入的用户编号
-	}OVDLockUserInfo;
-	
-	
-	typedef struct{
-	    OVDLockMsgType	msgType;			//消息类型
-	
-	    //msgType 为 OVD_LOCK_OPEN 才起作用
-	    OVDLockOpenInfo	openInfo;			//开锁信息
-	
-	    //msgType 为 OVD_LOCK_ADDUSER 或者 OVD_LOCK_DELUSER 才起作用
-	    OVDLockUserInfo	userInfo;			//添加/删除用户的详细信息
-	
-	    //msgType 为 OVD_LOCK_LOWBAT 才起作用
-	    int  			Electric;			//低电报警时附带的电量 1~100
-	}OVDLockMsgInfo;
 	
 	
 	typedef enum
