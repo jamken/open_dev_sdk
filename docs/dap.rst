@@ -21,12 +21,12 @@
   一般一路摄像头为一条channel。如果OVD为摄像头，则只有一条通道，且通道号必须为0；
   如果IVT为NVR/DVR，则会有多条通道，每条通道代表一个NVR管理下的摄像头。
 
-- OVS RPC：OVD与OVC之间采用的信令通信协议
+- OVS DAP：OVS device access protocol, OVD与OVC之间采用的接入信令通信协议，简称DAP
 
 2 协议特性
 ^^^^^^^^^^^^
 
-OVS RPC底层基于TCP/IP的WebSocket，应用层为基于JSON的自定义协议。
+OVS DAP底层基于TCP/IP的WebSocket，应用层为基于JSON的自定义协议。
 
 .. _`websocket URL`:
 
