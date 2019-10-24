@@ -7,6 +7,5 @@
    :maxdepth: 1
 
    protocol_index
-   OVD_OPEN_API
-   SDK_guidance
+   ovdsdk_index
 
