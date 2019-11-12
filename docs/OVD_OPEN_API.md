@@ -282,6 +282,17 @@ APP打开相关录像文件后，设备推送相关内容
     失败：-1
 
 
+## 11 OVD电池电量变化通知
+### 接口描述
+OVD可以通过该方法向OVC上报当前的电量，一般电量百分比变化时可以发送该通知事件。设备可以决定每隔多少百分比上报一次电量，比如每隔10%上报一次
+### 接口定义
+**`int OVD_BatteryChange(int battery);`**
+### 参数说明：
+    [in]battery:     设备当前的电量百分比，整数： 0-100
+### 返回值：
+    成功：0
+    失败：-1
+
 
 
 ## 11 回调OVD_CallBackFunList定义及说明
@@ -389,14 +400,29 @@ APP打开相关录像文件后，设备推送相关内容
 	     * 功能介绍：OVD收到此指令后，应该在指定的过期时间内，保证设备（及指定通道）能够完全正常上电工作。收到此命令expired秒后，由设备自行决定是否进入休眠状态
 	     *
 	    ** 参数说明：
-	    **    [in]channel:    需要保持不休眠的channel
-	    **    [in]expired:    从收到命令起，到expired的时间内，保持不休眠
+        **    [in]channel:           需要保持不休眠的channel
+        **    [in]notAllowHibernate:    是否允许进入休眠状态，0：允许进入休眠，进入休眠时间根据expired参数确定；1：不允许进入休眠，此种情况下，不管expired设置为多少，设备都要保持上电状态，不休眠，直至收到下一个休眠指令
+        **    [in]expired:           从收到命令起，到expired的时间内，保持不休眠
+        **    [in]reason:            设置不休眠的原因，详见枚举值定义OVDHibernateReason
+        **
 	    ** 返回值：
 	    **    成功：0
 	    **    失败：-1
 	    */
-	    int (*OVD_KeepAwakenUtilExpired)(int channel, int expired);
+	    int (*OVD_KeepAwakenUtilExpired)(int channel, int notAllowHibernate, int expired, OVDHibernateReason reason);
 
+
+        /*
+	     * 调用时机：当OVC决定设备恢复出厂配置时，调用此接口
+	     * 功能介绍：设备收到该请求后，应该将所有配置恢复到出厂状态（包括wifi配置），但不能断开当前网络连接，并返回成功应答。 OVC稍后会再下发一个重启指令将设备重启，默认配置生效
+	     *
+	    **参数说明:
+	    **
+	    **返回值：
+	    **    成功：0
+	    **    失败：-1
+        */
+        int (*OVD_ResetConfiguration)();
 
 	    /*
 	     * 调用时机：OVC查看OVD上SD卡的录像文件信息列表时，调用此接口
@@ -776,6 +802,12 @@ APP打开相关录像文件后，设备推送相关内容
 	    ...
 	  ],
 	  "tz": <必填，可读可写，整数：时区号，例如东八区为8>
+	  "auto_reboot": {   //自动维护（重启）能力，若OVD不具备该能力，则该字段不存在
+	    "on": <必填，可读可写,布尔型：使能开关>
+	    "cycle": <必填，可读可写,整型：自动维护（重启）的最短周期，单位秒，例如7天自动重启，可以设置为604800>
+	    "start": <必填，可读可写,整型：自动维护（重启）开始时间（当天的秒数），单位秒，例如凌晨2点，即7200，设备可在start到end时间内随机选择一个时间重启>
+	    "end": <必填，可读可写,整型：自动维护（重启）结束时间（当天的秒数），单位秒，例如凌晨6点，即21600，设备可在start到end时间内随机选择一个时间重启>
+	  }
 	 }
 	 *
 	 */
@@ -850,15 +882,16 @@ APP打开相关录像文件后，设备推送相关内容
 	
 	typedef struct
 	{
-	    char devId[MAX_LEN_32];                 //设备ID号，必填
-	    char hardwareModel[MAX_LEN_32];         //设备型号，必填
-	    char firmware_model[MAX_LEN_32];        //设备固件版本号，必填
+	    char OVDDeviceID[MAX_LEN_32];                 //设备ID号，必填
+	    char OVDHardWareModel[MAX_LEN_32];         //设备型号，必填
+	    char OVDSystemVersion[MAX_LEN_32];        //设备固件版本号，必填
 	    char wifi_ssid[WIFI_SSID_LEN];             //设备当前连接的wifi的ssid, 该字段空串表示未连接wifi，可选
 	    int  wifi_signal;               //设备当前wifi的信号强度, 0-100, 当wifi_ssid不为空时有效，可选
 	    int  upBandwidth;               //设备探测到的上行最大带宽，单位bps，不存在则表示上行带宽未知，负值表示未知，可选
 	    int  downBandwidth;             //设备探测到的下行最大带宽，单位bps，不存在则表示下行带宽未知，负值表示未知，可选
 	    char ipAddr[MAX_LEN_128];               //IP地址    <局域网IP，支持IPV6>，空值表示未知，可选
 	    char macAddr[MAX_LEN_32]; 	            //MAC地址，空值表示未知，可选
+	    int battery;
 	}OVDDeviceInfo;
 	
 	
@@ -875,25 +908,7 @@ APP打开相关录像文件后，设备推送相关内容
 	    int  hibernationHBInterval;       //<休眠心跳骤起>，没有置为值10s，单位为秒
 	    int  maxP2PSession;       //设备支持的最多的P2P流的个数，设备固有参数，服务器不能设置
 	}OVDNetParam;
-	
-	typedef enum{
-	        DevType_Gun  = 1,         //枪机
-	        DevType_Nvr  = 2,
-	        DevType_Card  = 4,        //卡片机
-	        DevType_Shake = 5,        //摇头机
-	        DevType_NewCard = 6,
-	        DevType_Battery = 7,
-	        DevType_4G   = 8,
-	        DevType_NewShake= 9,      //新摇头机 (16k全双工)
-	        DevType_NewGun = 10,      //为G3S2新加
-	        DevType_FaceRcgn= 11,     //人脸识别Q1
-	        DevType_BatSingle = 12,   //电池单品
-	        DevType_FamilyBall = 13,
-	        DevType_LockI9M    = 14,
-	        DevType_PtzCamera= 15,     //球机
-	        DevType_Other,
-	}OVDDEVType;
-	
+		
 	
 	typedef struct
 	{
@@ -995,6 +1010,16 @@ APP打开相关录像文件后，设备推送相关内容
 	    OVC_PTZ_GOTO_PRESET  = 11,   //跳转预置位
 	    OVC_PTZ_SET_PRESET   = 12,   //设置预置位点
 	    OVC_PTZ_CLEAR_PRESET = 13,   //清除预置位点
+	    OVC_PTZ_MV_UP_STEP   = 14,   //单步上
+	    OVC_PTZ_MV_DOWN_STEP   = 15, //单步下
+	    OVC_PTZ_MV_LEFT_STEP   = 16,  //单步左
+	    OVC_PTZ_MV_RIGHT_STEP  = 17,  //单步右
+	    OVC_PTZ_MV_UPLEFT_STEP  = 18,  //单步左上
+	    OVC_PTZ_MV_UPRIGHT_STEP  = 19,  //单步右上
+	    OVC_PTZ_MV_DOWNLEFT_STEP  = 20,  //单步左下
+	    OVC_PTZ_MV_DOWNRIGHT_STEP  = 21,  //单步右下
+	    OVC_PTZ_ZOOM_IN_STEP       = 22,  //单步拉近
+	    OVC_PTZ_ZOOM_OUT_STEP      = 23,  //单步拉远
 	}OVCPTZControlCmd;
 	
 	typedef enum{
@@ -1025,12 +1050,15 @@ APP打开相关录像文件后，设备推送相关内容
 	
 	typedef enum
 	{
-	    OVD_OUTTER  =   1,      //外部告警
-	    OVD_MOTIOM	= 	2,      //移动侦测
-	    OVD_CROSS	= 	3,      //拌网侦测
-	    OVD_CRY		=	4,      //哭声侦测
-	    OVD_FACE	=	5,      //脸部识别
-	    OVD_VOICE	=	6,      //声音侦测
+	    OVD_OUTTER  =   2,      //外部告警
+	    OVD_MOTIOM	= 	3,      //移动侦测
+	    OVD_CROSS	= 	4,      //拌网侦测
+	    OVD_CRY		=	5,      //哭声侦测
+	    OVD_FACE	=	6,      //脸部识别
+	    OVD_VOICE	=	7,      //声音侦测
+	    OVD_LOW_BATTERY	=	8,      //低电告警
+	    OVD_LOSS_LOCK	=	9,      //撬锁告警
+	    OVD_BELL	=	10,      //按铃事件
 	    OVD_OTHER,
 	}OVDAlarmType;
 	
@@ -1069,6 +1097,14 @@ APP打开相关录像文件后，设备推送相关内容
 	    int  pwdLen;
 	    char phone[16+1];
 	}OVDXXSSIDWiFiInfo;
+
+	typedef enum
+	{
+	    OVD_HIBERNATE_OVC_NOTIFY = 0,   //OVC信令交互，需要保持一段时间不断电
+	    OVD_HIBERNATE_P2P_NAT = 1,      //P2P开始NAT穿透打洞
+	    OVD_HIBERNATE_P2P_OPEN = 2,     //正在P2P通话
+	    OVD_HIBERNATE_OTHER = 3
+	}OVDHibernateReason;
 
 	typedef void (*RecognizerStart)(void);
 	typedef void (*RecognizerFinish)(int type, void *info, int infoLen);
