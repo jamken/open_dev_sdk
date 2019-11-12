@@ -295,7 +295,7 @@ OVD可以通过该方法向OVC上报当前的电量，一般电量百分比变�
 
 
 
-## 11 回调OVD_CallBackFunList定义及说明
+## 12 回调OVD_CallBackFunList定义及说明
 ### 回调结构体定义
     typedef struct{
 	    /*
