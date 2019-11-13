@@ -63,7 +63,8 @@
 	CONFIG_EXTERNAL_TOOL_CHAIN=y (是否用非系统默认gcc)
 	TOOLCHAIN_BIN_PATH=/opt/ovd_toolchain/rockchip-3308/prebuilts/gcc/linux-x86/aarch64/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin (交叉工具链gcc的二进制路径)
 	CROSS_COMPILE=aarch64-linux-gnu-   (交叉工具链gcc前缀)
-	CROSS_SYSROOT=/opt/ovd_toolchain/rockchip-3308/prebuilts/gcc/linux-x86/aarch64/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/aarch64-linux-gnu/libc (交叉工具链的逻辑库地址)
+	CROSS_SYSROOT=/opt/ovd_toolchain/rockchip-3308/prebuilts/gcc/linux-x86/aarch64/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/aarch64-linux-gnu/libc (交叉工具链的逻辑库地址，标准linux平台使用此配置，liteOS平台不使用)
+    LITEOSSDKDIR=/data/opt/809-mobile/platforms/d809/sdk/Hi3518E_SDK_V5.0.6.0/osdrv/opensource/liteos/liteos (liteOS SDK配置路径，标准linux平台不使用此配置)
 	CUSTOM_CFLAGS=                   (厂商设备需特定的编译参数)
 	
 	若厂商已配置好自己的交叉工具链GCC环境，例如默认gcc 直接指向 交叉工具链，则厂商只需将CONFIG_EXTERNAL_TOOL_CHAIN=N 即可，不需指定TOOLCHAIN_BIN_PATH, CROSS_COMPILE, CROSS_SYSROOT 这3个参数，否则
@@ -155,10 +156,15 @@
 ## 四、demo使用流程
 
 ### 1 编译链接
-
-	1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / CROSS_SYSROOT / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
-	2、在主目录上执行TARGET_BUILD=XXX make demo
-	3、生成的可执行文件在demo/build/XXX/bin目录下
+	a. 标准linux平台
+		1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / CROSS_SYSROOT / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
+		2、在主目录上执行TARGET_BUILD=XXX make demo
+		3、生成的可执行文件在demo/build/XXX/bin目录下
+	b. liteOS 平台
+		1.集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE/ 
+		LITEOSSDKDIR / CUSTOM_CFLAGS进行修改，适配编译环境（XXX 为设备型号标识）
+		2、在主目录上执行TARGET_BUILD=XXX make demo
+		3.生成的静态库在demo/build/XXX/bin目录下
 
 ### 2 运行参数配置
 
@@ -188,10 +194,14 @@
 ## 五、sample使用流程
 
 ### 1 编译链接
-
-	1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / CROSS_SYSROOT / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
-	2、在主目录上执行TARGET_BUILD=XXX make samples
-	3、生成的可执行文件在samples/build/XXX/bin目录下
+	a.标准linux平台
+		1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / CROSS_SYSROOT / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
+		2、在主目录上执行TARGET_BUILD=XXX make samples
+		3、生成的可执行文件在samples/build/XXX/bin目录下
+	b.liteOS平台
+		1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / LITEOSSDKDIR / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
+		2、在主目录上执行TARGET_BUILD=XXX make samples
+		3、生成的可执行文件在demo/build/XXX/bin目录下
 
 ### 2 sample各个子模块执行
 

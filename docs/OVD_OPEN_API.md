@@ -608,12 +608,13 @@ OVD可以通过该方法向OVC上报当前的电量，一般电量百分比变�
 	     *
 	    **参数说明:
 	    **    [in]channel:         通道号
+        **    [in]andioFormat:     对讲音频数据的格式信息，见结构体定义OVDAudioOutDataFormat
 	    **
 	    **返回值：
 	    **    成功：0
 	    **    失败：-1
 	    */
-        int (*OVD_AudioPlayStart)(int channel);
+        int (*OVD_AudioPlayStart)(int channel, OVDAudioOutDataFormat andioFormat);
 
 
 	    /*
@@ -1025,6 +1026,15 @@ OVD可以通过该方法向OVC上报当前的电量，一般电量百分比变�
 	typedef enum{
 	    PCM          = 0,
 	}OVDAUDIOPLY_TYPE;
+
+	typedef struct
+	{
+	    unsigned int codec;         //OVDAUDIOPLY_TYPE
+	    unsigned int samplesRate;
+	    unsigned int bitWidth;
+	    unsigned int volume;
+	    unsigned int priority;      //the biger ,the higher
+	}OVDAudioOutDataFormat;
 	
 	typedef enum
 	{
