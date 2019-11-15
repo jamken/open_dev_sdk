@@ -60,7 +60,7 @@ OVD应该按照一定的时间周期（60秒），在TCP长连接上，向OVC发
   typedef struct
   {
       char magic[2];         // 同步字段，固定为0xcc, 0x00
-      uint16_t length;       // 长度，固定为18，大端
+      uint16_t length;       // 长度，固定为24，大端
       char macid[16];        // 设备id，16位十进制数字字符串，例如"2009550000011079"
       uint8_t cmd;           // 命令字, 固定为0x4A。
       uint8_t reserved1;     // 保留字节
