@@ -16,6 +16,8 @@
 
 - OVS RECORD：OVD与OVC之间采用的录像切片上传服务
 
+- 录像直存通道： 切片直存服务是以通道为单位进行管理的，每个分片只属于某一个特定的通道。每个编码设备应该将录像且片上传到自己对应的通道中。
+
 ## 2 服务描述
 
 
@@ -31,11 +33,11 @@ OVS RECORD服务的主要目标是对OVD直接提供录像分片（HTTP）上传
 
 2. OVD将实时媒体流录制成一个分片
 
-3. OVD向直存服务（通过接口URL）发送create请求，获得分片上传URL
+3. OVD向通道对应的URL发送create请求，获得分片上传URL
 
 4. OVD通过（http）PUT方法，将分片上传到该存储地址
 
-5. OVD向直存服务（通过接口URL）发送save请求，确认分片上传成功
+5. OVD向通道对应的URL发送save请求，确认分片上传成功
 
 6. 跳转步骤2，继续下一个分片
 
@@ -51,7 +53,7 @@ OVS RECORD服务的主要目标是对OVD直接提供录像分片（HTTP）上传
 
 ## 3 服务接口API
 
-RECORD服务对外提供HTTP接口api，接入设备只需要支持http协议，即可调用该服务各项功能。每套OVD在OVC上对应一个录像直存通道，每个直存通道拥有一个独立的HTTP URL供外部调用
+RECORD服务对外提供HTTP类型api，接入设备只需要支持http协议，即可通过直存服务进行切片上传。一台OVD设备在OVC上对应一个录像直存通道，每个直存通道拥有一个独立的HTTP URL供外部调用。
 
 直存通道的URL类似如下格式： 
 
@@ -59,7 +61,9 @@ RECORD服务对外提供HTTP接口api，接入设备只需要支持http协议，
   http://<OVC domain:port>/live/cseg/<通道ID>
 ```
 
-其中通道ID为系统为每个OVD设备分配的通道ID，用于区分不同的设备的录像。直存服务的所有请求都是通过POST方法发送，参数都是通过form格式（key1=value1&key2=value2...）传输，响应结果通过json格式返回。
+其中通道ID为系统为每个OVD设备分配的通道ID，用于区分不同的设备的录像。直存服务的所有请求都是通过POST方法发送，参数都是基于x-www-form-urlencoded格式（key1=value1&key2=value2...）通过请求消息体发送，
+执行结果通过响应消息体json格式返回。
+
 
 
 
@@ -75,28 +79,31 @@ RECORD服务对外提供HTTP接口api，接入设备只需要支持http协议，
 
 - Content-Type：application/x-www-form-urlencoded
 
-**HTTP请求消息体（举例）：**
-
-```
-  op=create&content_type=video%2Fmp2t&size=%d&start=%.6f&duration=%.6f
-```  
-
 **HTTP请求参数：**
 
-HTTP请求的消息体为form格式字符串，参数说明如下：
+HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求body中，相关的参数描述如下：
 
 ```
   op: 字符串枚举型，必填：创建分片固定为create
   content_type：字符串，必填：分片的封装格式，目前仅支持video/mp2t
-  size:字符串,必填:该分片数据的大小
+  size:字符串,必填:该分片数据的大小，字节为单位
   start:字符串,必填:该分片录制的开始时间
   duration:字符串,必填:该分片的时间长度
 ```
+
+最终在HTTP请求body的字符串示例如下：
+
+```
+  op=create&content_type=video%2Fmp2t&size=32768&start=1574322174&duration=600
+``` 
 
 
 **HTTP状态码：**
 
 - 200：正常
+- 400~499：用户输入错误
+- 500~599：服务器异常
+
 
 **HTTP响应头：**
 
@@ -104,34 +111,29 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 - Access-Control-Allow-Origin：\*
 - Access-Control-Allow-Methods：POST 
 
-**HTTP响应消息体（举例）：**
+**HTTP响应：**
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
 
 正常情况
 ```
 	{
-	 "code": 0,
-	 "msg": "OK",
-	 "data": 
-	 {
-		 "file_name":"20191031/record/00000000001/1542246739.ts"，
-		 "uri":"https://oss.endpoint/ossbucket/20191031/record/00000000001/1542246739.ts"
-	  }
+	  "name": <字符串，必填：新分片的文件名称，如果为空串表示该分片不上传>
+	  "uri": <字符串，必填：新分片的上传URL，如果为空串表示该分片不上传>
 	}
 ```
 HTTP响应的消息体为JSON格式字符串，返回值描述如下：
-```
-file_name:字符串,下一个数据分片的文件名称
-uri:字符串,下一个数据分片的上传uri地址
-```
+
+
 异常情况
 ```
 	{
-	 "code": 7,
-	 "msg": "INVALID_PARAM"
+	  "info": <字符串，必填：错误描述>
 	}
 ```
 
 ### 3.2 确认分片
+
 **HTTP请求方法：**
 
 ```
@@ -142,25 +144,27 @@ uri:字符串,下一个数据分片的上传uri地址
 
 - Content-Type：application/x-www-form-urlencoded
 
-**HTTP请求消息体（举例）：**
-
-```
-  op=save&name=%s
-```  
 
 **HTTP请求参数：**
 
-HTTP请求的消息体为form格式字符串，参数说明如下：
+HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求body中，相关的参数描述如下：
 
 ```
-  op: 字符串枚举型，必填：确认分片固定为save
-  name：字符串，必填：需要确认的分片文件名
+  op: 字符串枚举型，必填：创建分片固定为save
+  name：字符串，必填：需要确认的分片的文件名，应该和create请求中返回的文件名相对应
 ```
 
+最终在HTTP请求body的字符串示例如下：
+
+```
+  op=save&name=0003.ts
+```  
 
 **HTTP状态码：**
 
 - 200：正常
+- 400~499：用户输入错误
+- 500~599：服务器异常
 
 **HTTP响应头：**
 
@@ -168,24 +172,26 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 - Access-Control-Allow-Origin：\*
 - Access-Control-Allow-Methods：POST 
 
-**HTTP响应消息体（举例）：**
+**HTTP响应：**
 
-正常情况
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
 
+正常情况body:
+
+```
+无
+```
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
+
+
+异常情况body:
 ```
 	{
-	   "code": 0,
-	   "msg": "OK"
+	 "info": <字符串，必填：错误描述>
 	}
-```  
+```
 
-异常情况
-```
-	{
-	   "code": 10401,
-	   "msg": "VOD_FILE_UPLOAD_FAILED"
-	}
-```
 
 ### 3.3 取消分片
 **HTTP请求方法：**
@@ -198,21 +204,21 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 
 - Content-Type：application/x-www-form-urlencoded
 
-**HTTP请求消息体（举例）：**
-
-```
-  op=fail&name=%s
-```  
 
 **HTTP请求参数：**
 
-HTTP请求的消息体为form格式字符串，参数说明如下：
+HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求body中，相关的参数描述如下：
 
 ```
   op: 字符串枚举型，必填：取消分片固定为fail
-  name：字符串，必填：需要取消的分片文件名
+  name：字符串，必填：需要取消的分片的文件名，应该和create请求中返回的文件名相对应
 ```
 
+最终在HTTP请求body的字符串示例如下：
+
+```
+  op=fail&name=0003.ts
+```  
 
 **HTTP状态码：**
 
@@ -224,27 +230,31 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 - Access-Control-Allow-Origin：\*
 - Access-Control-Allow-Methods：POST 
 
-**HTTP响应消息体（举例）：**
 
-正常情况
+**HTTP响应：**
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
+
+正常情况body:
 
 ```
-	{
-	   "code": 0,
-	   "msg": "OK"
-	}
-```  
+无
+```
 
-异常情况
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
+
+
+异常情况body:
 ```
 	{
-	   "code": 6,
-	   "msg": "OBJECT_NOT_EXIST"
+	 "info": <字符串，必填：错误原因>
 	}
 ```
 
 
 ### 3.4 获取服务器当前日历时间
+
+
 **HTTP请求方法：**
 
 ```
@@ -255,20 +265,20 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 
 - Content-Type：application/x-www-form-urlencoded
 
-**HTTP请求消息体（举例）：**
+
+**HTTP请求参数：**
+
+HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求body中，相关的参数描述如下：
+
+```
+  op: 字符串枚举型，必填：操作类型，获取时间固定为getcurrenttime
+```
+
+最终在HTTP请求body的字符串示例如下：
 
 ```
   op=getcurrenttime
 ```  
-
-**HTTP请求参数：**
-
-HTTP请求的消息体为form格式字符串，参数说明如下：
-
-```
-  op: 字符串枚举型，必填：获取服务器时间固定为getcurrenttime
-```
-
 
 **HTTP状态码：**
 
@@ -280,51 +290,24 @@ HTTP请求的消息体为form格式字符串，参数说明如下：
 - Access-Control-Allow-Origin：\*
 - Access-Control-Allow-Methods：POST 
 
-**HTTP响应消息体（举例）：**
+**HTTP响应：**
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
 
 正常情况
 ```
 	{
-		"code": 0,
-		"msg": "OK",
-		"data": 
-		{
-		"currenttime":"111111111"
-		}
+	  "currenttime": <浮点数，必填：从epoch到当前的秒数，单位为秒>
 	}
-```  
+```
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
 
 异常情况
 ```
 	{
-		"code": 10004,
-		"msg": "AUTH_TIME_TOO_SKEWED",
+	  "info": <字符串，必填：错误原因>
 	}
-```
-
-**HTTP响应说明：**
-
-HTTP响应的消息体为JSON格式字符串，返回值和msg描述如下：
-
-```
-code	msg							错误描述
-0		OK							成功
-6		OBJECT_NOT_EXIST			对象不存在
-7		INVALID_PARAM				参数错误
-500		SERVER_INNER_ERROR			内部服务错误
-10001	AUTH_INVALID_ACCESSKEY		非法AccessKey
-10002	AUTH_SIGN_ERROR				鉴权检查错误
-10003	AUTH_REPEATED_REQUEST		重复的请求
-10004	AUTH_TIME_TOO_SKEWED		请求时间与服务器时差过大
-10005	AUTH_TIME_PARSE_EXCEPTION	鉴权时间格式转换异常
-10201	LIVE_CHANNEL_NOT_EXIST		channelId不存在
-10202	LIVE_PUSHURL_OUT_OF_TIME	推流地址过期
-10203	LIVE_NO_RECORD				未开启转录
-10204	LIVE_CHANNEL_ALREADY_EXIST	channelId已存在
-10401	VOD_FILE_UPLOAD_FAILED		文件上传失败
-10402	VOD_FILE_NOT_EXIST			视频文件不存在
-10403	VOD_FILE_AUTH_FAILED		上传认证失败
-10404	VOD_FILE_AUTH_EXPIRED		上传认证过期
 ```
 
 
