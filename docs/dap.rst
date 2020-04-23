@@ -95,9 +95,9 @@ OVD设备并不需要支持本文档中罗列的所有RPC/event方法，OVD设�
 
 3. OVD需要支持每10秒向平台发送 `Keepalive`_ .
 
-4. OVD需要接受平台下发的`启动推流 `RTMPPublish`_ 请求
+4. OVD需要接受平台下发的`启动推流 `LivePublish`_ 请求
 
-5. OVD需要接受平台下发的`结束推流 `RTMPStopPublish`_ 请求
+5. OVD需要接受平台下发的`结束推流 `LiveStopPublish`_ 请求
 
 6. OVD需要能够正确处理异常情况 `异常处理 <2.2 异常处理>`_
 
@@ -221,7 +221,7 @@ OVC在30秒内没有收到OVD的信息则认为OVD下线，建议10秒左右上�
       {
         "channel": <必填，整数>,
         "state": <必填，整数；该channel的状态，0：离线，1：在线>,
-        "stream_id": <可选，字符串；当前channel正在进行的推流对应的云端stream_id，即RTMPPublish方法中给定的stream_id，空字符串或该域不存在表示该channel没有进行推流>
+        "stream_id": <可选，字符串；当前channel正在进行的推流对应的云端stream_id，即LivePublish方法中给定的stream_id，空字符串或该域不存在表示该channel没有进行推流>
         "record_session": <可选，字符串；当前channel正在进行的录像的云端session ID，录像session ID为StartCloudRecord请求中的session_id域；空字符串或该域不存在表示没有进行云录像>
         "alarm": <可选，整数；当前报警状态flags，每一位（从0开始计数）对应一种报警类型，当相应位为1时，标示该类型的报警被触发；参考报警状态flags>
       }
@@ -349,8 +349,24 @@ OVC可以通过该方法请求OVD重启设备。
 
   无
 
+Reschedule
+-----------------
 
-  
+OVC可以通过该方法请求OVD重新获取OVC接入URL
+
+类型： ::
+
+  EVENT
+
+方向： ::
+
+  OVC -> OVD
+
+
+参数： ::
+
+  无
+
   
 UpgradeFirmware
 -------------------
@@ -535,7 +551,7 @@ OVC稍后会再下发一个重启指令将设备重启，默认配置生效。
 +++++++++++++++++++
 
 
-RTMPPublish
+LivePublish
 -----------------
 
 OVC可以通过该方法请求OVD 推送一条实时媒体流到指定URL；
@@ -556,7 +572,7 @@ OVC可以通过该方法请求OVD 推送一条实时媒体流到指定URL；
 
   {
     "channel": <必填，整数>,
-    "url": <必填，字符串；流推送的目标URL>,
+    "url": <必填，字符串；流推送的首选目标URL1>
     "stream_id": <必填，字符串；OVC用来标识这条流的ID>,
     "max_bitrate": <必填，整数，单位bit/s；用来表示最大允许的码率，0表示没有限制，若相应流码率大于该值，需返回失败>
   }
@@ -572,7 +588,7 @@ OVC可以通过该方法请求OVD 推送一条实时媒体流到指定URL；
 - 101: 不支持的RPC方法
 
 
-RTMPStopPublish
+LiveStop
 ------------------
 
 OVC可以通过该方法请求OVD结束正在推送的实时媒体流。
@@ -589,7 +605,7 @@ OVC可以通过该方法请求OVD结束正在推送的实时媒体流。
 参数： ::
 
   {
-    "stream_id": <必填，字符串；RTMPPublish时给的stream_id>,
+    "stream_id": <必填，字符串；LivePublish时给的stream_id>,
     "channel": <必填，整数>
   }
 
