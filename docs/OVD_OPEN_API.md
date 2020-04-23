@@ -859,28 +859,6 @@ OVD可以通过该方法向OVC上报当前的电量，一般电量百分比变�
 	    unsigned short reserve;
 	}OVDAudioDataFormat;
 	
-	typedef struct{
-	    int isEffect;                  //是否具备此能力，若设备无此能力，置为0；具备此能力，置为1
-	    int on;                        //是否打开此功能，在isEffect为1时有效，0时无效
-	    int sensitivity;               //探测灵敏度，范围为0-100，在isEffect为true时有效
-	}OVDAlarmInfo;
-	
-	typedef struct{
-	    OVDAlarmInfo   ioAlarm;              //外部报警配置，必填
-	    OVDAlarmInfo   faceAlarm;            //人脸识别配置，必填
-	    OVDAlarmInfo   cryAlarm;             //哭声侦测配置，必填
-	    OVDAlarmInfo   voiceAlarm;           //声音侦测配置，必填
-	    OVDAlarmInfo   motionAlarm;          //移动侦测配置，必填
-	    OVDAlarmInfo   crossAlarm;           //拌网配置，必填
-	}OVDAlarmsSet;
-	
-	typedef struct
-	{
-	    int horflip;              //水平翻转，1表示翻转，0表示正常,必填,
-	    int verflip;              //垂直翻转，1表示翻转，0表示正常,必填,
-	}OVDMirrorFlip;
-	
-	
 	typedef struct
 	{
 	    char OVDDeviceID[MAX_LEN_32];                 //设备ID号，必填
