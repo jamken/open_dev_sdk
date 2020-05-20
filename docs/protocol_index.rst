@@ -9,4 +9,5 @@
    dap
    hibernation
    cloud_record
+   dev_dispatcher
 
