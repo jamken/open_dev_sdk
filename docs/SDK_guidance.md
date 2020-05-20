@@ -156,11 +156,17 @@
 ## 四、demo使用流程
 
 ### 1 编译链接
-	a. 标准linux平台
+
+	a. x86_64 linux平台
+		1.我们提供的sdk内部有提供x86环境编译出的静态库，供厂商在x86 模拟运行使用。 我们默认编译服务器配置为：gcc版本4.8.5 c++库为libstdc++.so.6.0.19 , 厂商二次编译demo时，gcc和c++库不能低于此配置要求。
+		2.厂商在主目录上执行make demo
+		3.生成的执行程序在demo/build/x86_64/bin 目录下
+	
+	b. 标准linux平台
 		1、集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE / CROSS_SYSROOT / CUSTOM_CFLAGS进行修改，适配编译环境(XXX 为设备型号标识)
 		2、在主目录上执行TARGET_BUILD=XXX make demo
 		3、生成的可执行文件在demo/build/XXX/bin目录下
-	b. liteOS 平台
+	c. liteOS 平台
 		1.集成商首先在SDK根目录的config文件夹下，在XXX.config文件中对TOOLCHAIN_BIN_PATH / CROSS_COMPILE/ 
 		LITEOSSDKDIR / CUSTOM_CFLAGS进行修改，适配编译环境（XXX 为设备型号标识）
 		2、在主目录上执行TARGET_BUILD=XXX make demo
