@@ -81,9 +81,9 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
 ```
   op: 字符串枚举型，必填：创建分片固定为create
   content_type：字符串，必填：分片的封装格式，目前仅支持video/mp2t
-  size:字符串,必填:该分片数据的大小，字节为单位
-  start:字符串,必填:该分片录制的开始时间
-  duration:字符串,必填:该分片的时间长度
+  size:整数,必填:该分片数据的大小，字节为单位
+  start:浮点数,必填:该分片录制的开始时间，从epoch到分片的开始录制时间，单位秒
+  duration:浮点数,必填:该分片的时间长度，单位秒
 ```
 
 最终在HTTP请求body的字符串示例如下：
@@ -276,7 +276,7 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
 
 ```
   op=getcurrenttime
-```  
+```
 
 **HTTP状态码：**
 
@@ -311,4 +311,70 @@ HTTP响应的消息体为JSON格式字符串，返回值描述如下：
 	}
 ```
 
+### 3.5 上报统计数据
+
+
+
+**HTTP请求方法：**
+
+OVD通过此接口，向OVR上报录像切片相关统计信息
+
+```
+  POST
+```  
+
+**HTTP请求头：**
+
+- Content-Type：application/x-www-form-urlencoded
+
+
+**HTTP请求参数：**
+
+HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求body中，相关的参数描述如下：
+
+```
+  op: 字符串枚举型，必填：取消分片固定为stat
+  dropped：整数，选填：上一次上报完成后到当前时间内的分片丢弃数目（由于缓存队列满）。默认为0
+  error: 整数，选填：上一次上报完成后到当前时间内的上传失败分片数目。默认为0
+```
+
+最终在HTTP请求body的字符串示例如下：
+
+```
+  op=stat&dropped=3&error=1
+```  
+
+**HTTP状态码：**
+
+- 200：正常
+- 400~499：用户输入错误
+- 500~599：服务器异常
+
+
+**HTTP响应头：**
+
+- Content-Type：application/json; charset=utf-8
+- Access-Control-Allow-Origin：\*
+- Access-Control-Allow-Methods：POST 
+
+
+**HTTP响应：**
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
+
+正常情况body:
+
+```
+无
+```
+
+HTTP响应的消息体为JSON格式字符串，返回值描述如下：
+
+
+异常情况body:
+```
+	{
+	 "info": <字符串，必填：错误原因>
+	}
+```
 
