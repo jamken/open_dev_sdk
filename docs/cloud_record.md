@@ -85,6 +85,7 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
   start:浮点数,必填:该分片录制的开始时间，从epoch到分片的开始录制时间，单位秒
   duration:浮点数,必填:该分片的时间长度，单位秒
   discontinue:整数，必填：连续分片标记，0表示该分片与上一分片时间戳连续；1表示该分片与上一分片非时间戳连续。
+              由于兼容性原因，老版本没有discontinue字段，表示连续性未知。
 ```
 
 最终在HTTP请求body的字符串示例如下：
