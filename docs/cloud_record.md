@@ -84,12 +84,13 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
   size:整数,必填:该分片数据的大小，字节为单位
   start:浮点数,必填:该分片录制的开始时间，从epoch到分片的开始录制时间，单位秒
   duration:浮点数,必填:该分片的时间长度，单位秒
+  discontinue:整数，必填：连续分片标记，0表示该分片与上一分片时间戳连续；1表示该分片与上一分片非时间戳连续。
 ```
 
 最终在HTTP请求body的字符串示例如下：
 
 ```
-  op=create&content_type=video%2Fmp2t&size=32768&start=1574322174&duration=600
+  op=create&content_type=video%2Fmp2t&size=32768&start=1574322174&duration=600&discontinue=0
 ``` 
 
 
@@ -334,14 +335,14 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
 
 ```
   op: 字符串枚举型，必填：取消分片固定为stat
-  dropped：整数，选填：上一次上报完成后到当前时间内的分片丢弃数目（由于缓存队列满）。默认为0
-  error: 整数，选填：上一次上报完成后到当前时间内的上传失败分片数目。默认为0
+  dropped_nb：整数，选填：上一次上报完成后到当前时间内的分片丢弃数目（由于缓存队列满）。默认为0
+  dropped_time: 浮点数，选填：上一次上报完成后到当前时间内的录像丢失时长（由于缓存队列满）。默认为0
 ```
 
 最终在HTTP请求body的字符串示例如下：
 
 ```
-  op=stat&dropped=3&error=1
+  op=stat&dropped_nb=3&dropped_time=30
 ```  
 
 **HTTP状态码：**
