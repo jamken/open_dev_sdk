@@ -86,12 +86,14 @@ HTTP请求参数使用x-www-form-urlencoded格式编码，包含在POST请求bod
   duration:浮点数,必填:该分片的时间长度，单位秒
   discontinue:整数，必填：连续分片标记，0表示该分片与上一分片时间戳连续；1表示该分片与上一分片非时间戳连续。
               由于兼容性原因，老版本没有discontinue字段，表示连续性未知。
+  https:整数，必填：分片上传是否支持https协议，1表示支持，接口返回的分片上传URL为https协议，0表示不支持，接口返回的分片上传URL为http协议。
+         默认为0。
 ```
 
 最终在HTTP请求body的字符串示例如下：
 
 ```
-  op=create&content_type=video%2Fmp2t&size=32768&start=1574322174&duration=600&discontinue=0
+  op=create&content_type=video%2Fmp2t&size=32768&start=1574322174&duration=600&discontinue=0&https=0
 ``` 
 
 
