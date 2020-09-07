@@ -27,7 +27,7 @@ DAP底层基于TCP/IP的WebSocket，应用层为基于JSON的自定义协议。
 
 websocket URL::
 
-  ws://<OVC domain:port>/ovc?login_code=<OVD设备ID>&login_passwd=<OVD接入密码>&hardware_model=<OVD的硬件型号>&firmware_model=<OVD的固件版本号>&sdk=<SDK版本号>
+  ws://<OVC domain:port>/ovc?login_code=<OVD设备ID>&login_passwd=<OVD接入密码>&hardware_model=<OVD的硬件型号>&firmware_model=<OVD的固件版本号>&sdk=<SDK版本号>&reconnect=<是否重连>
 
 OVD通过上述URL主动连接并登录OVC平台，其中: ::
 
@@ -36,7 +36,7 @@ OVD通过上述URL主动连接并登录OVC平台，其中: ::
   hardware_model: <字符串，必填：OVD的硬件型号, 由OVD厂家自定义，主要用于后期问题追踪，以及用于支持平台远程固件升级>
   firmware_model：<字符串，必填：OVD的固件版本号, 由OVD厂家自定义，主要用于后期问题追踪，以及用于支持平台远程固件升级>
   sdk: <字符串，选填：当前使用的ovdsdk的版本号，由SDK内部填写，没有使用ovdsdk可以不提供此参数，默认值为空>
-  reconnect: <整数，选填：本次连接是否为重连。0表示本次连接是OVD启动后首次连接，1表示本次连接是连接断开后重连>
+  reconnect: <整数，选填：本次连接是否为重连。0表示本次连接是OVD启动后首次连接，1表示本次连接是连接断开后重连，默认为0>
   
 另外，WebSocket的子协议为空，无需指定。
 
